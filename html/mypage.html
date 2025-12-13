@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>マイページ | FLOWGRAM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400&family=Noto+Sans+JP:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --peach-glow: #FFD5D9;
+      --blush-pink: #F8E7EF;
+      --lavender-haze: #EEE7FF;
+      --soft-mist: #F5F4F6;
+      --white: #FFFFFF;
+      --coral-rose: #FF8CA5;
+      --coral-rose-hover: #FF7A96;
+      --text-primary: #2F2F2F;
+      --text-secondary: #666666;
+      --text-light: #888888;
+      --error: #E57373;
+      --success: #81C784;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --sidebar-width: 260px;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Noto Sans JP', sans-serif; color: var(--text-primary); line-height: 1.8; background: var(--soft-mist); min-height: 100vh; }
+    .font-en { font-family: 'Montserrat', sans-serif; font-weight: 300; }
+    .dashboard { display: flex; min-height: 100vh; }
+    
+    /* Sidebar */
+    .sidebar { width: var(--sidebar-width); background: var(--white); border-right: 1px solid rgba(0,0,0,0.05); position: fixed; top: 0; left: 0; height: 100vh; display: flex; flex-direction: column; z-index: 100; transition: transform 0.3s ease; }
+    .sidebar-header { padding: 24px; border-bottom: 1px solid var(--soft-mist); }
+    .sidebar-logo { font-family: 'Montserrat', sans-serif; font-size: 22px; letter-spacing: 2px; color: var(--text-primary); text-decoration: none; }
+    .sidebar-logo span { color: var(--coral-rose); }
+    .sidebar-nav { flex: 1; padding: 24px 16px; overflow-y: auto; }
+    .nav-section { margin-bottom: 32px; }
+    .nav-section-title { font-size: 11px; color: var(--text-light); text-transform: uppercase; letter-spacing: 1px; padding: 0 12px; margin-bottom: 12px; }
+    .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; color: var(--text-secondary); text-decoration: none; font-size: 14px; border-radius: var(--radius-md); transition: all 0.3s ease; margin-bottom: 4px; }
+    .nav-item:hover { background: var(--soft-mist); color: var(--text-primary); }
+    .nav-item.active { background: linear-gradient(135deg, rgba(255,213,217,0.3) 0%, rgba(238,231,255,0.3) 100%); color: var(--coral-rose); }
+    .nav-item svg { width: 20px; height: 20px; flex-shrink: 0; }
+    .nav-item .badge { margin-left: auto; background: var(--coral-rose); color: white; font-size: 11px; padding: 2px 8px; border-radius: 10px; }
+    .sidebar-footer { padding: 16px; border-top: 1px solid var(--soft-mist); }
+    .user-card { display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--soft-mist); border-radius: var(--radius-md); }
+    .user-avatar { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, var(--peach-glow) 0%, var(--lavender-haze) 100%); display: flex; align-items: center; justify-content: center; font-size: 16px; color: var(--coral-rose); }
+    .user-info { flex: 1; min-width: 0; }
+    .user-name { font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .user-plan { font-size: 11px; color: var(--text-light); }
+    
+    /* Main */
+    .main-content { flex: 1; margin-left: var(--sidebar-width); min-height: 100vh; }
+    .topbar { background: var(--white); padding: 16px 32px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 50; }
+    .topbar-left { display: flex; align-items: center; gap: 16px; }
+    .mobile-menu-btn { display: none; background: none; border: none; cursor: pointer; padding: 8px; }
+    .mobile-menu-btn span { display: block; width: 24px; height: 2px; background: var(--text-primary); margin: 5px 0; }
+    .page-title { font-size: 20px; font-weight: 300; }
+    .topbar-right { display: flex; align-items: center; gap: 16px; }
+    .search-box { display: flex; align-items: center; gap: 8px; background: var(--soft-mist); padding: 10px 16px; border-radius: 50px; width: 240px; }
+    .search-box input { border: none; background: transparent; font-size: 14px; font-family: inherit; outline: none; width: 100%; }
+    .search-box svg { color: var(--text-light); width: 18px; height: 18px; }
+    .topbar-btn { width: 40px; height: 40px; border-radius: 50%; border: none; background: var(--soft-mist); cursor: pointer; display: flex; align-items: center; justify-content: center; position: relative; transition: all 0.3s ease; }
+    .topbar-btn:hover { background: var(--peach-glow); }
+    .topbar-btn svg { width: 20px; height: 20px; color: var(--text-secondary); }
+    .topbar-btn .notification-dot { position: absolute; top: 8px; right: 8px; width: 8px; height: 8px; background: var(--coral-rose); border-radius: 50%; }
+    .content { padding: 32px; }
+    
+    /* Cards */
+    .dashboard-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-bottom: 32px; }
+    .stat-card { background: var(--white); padding: 24px; border-radius: var(--radius-lg); transition: all 0.3s ease; }
+    .stat-card:hover { transform: translateY(-4px); box-shadow: 0 10px 40px rgba(0,0,0,0.05); }
+    .stat-icon { width: 48px; height: 48px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 16px; }
+    .stat-icon.peach { background: rgba(255,213,217,0.5); }
+    .stat-icon.lavender { background: rgba(238,231,255,0.5); }
+    .stat-icon.mint { background: rgba(200,230,201,0.5); }
+    .stat-icon.sky { background: rgba(187,222,251,0.5); }
+    .stat-value { font-size: 28px; font-weight: 300; margin-bottom: 4px; }
+    .stat-label { font-size: 13px; color: var(--text-light); }
+    
+    /* Sections */
+    .section { background: var(--white); border-radius: var(--radius-lg); margin-bottom: 24px; }
+    .section-header { padding: 20px 24px; border-bottom: 1px solid var(--soft-mist); display: flex; justify-content: space-between; align-items: center; }
+    .section-title { font-size: 16px; font-weight: 400; }
+    .section-action { font-size: 13px; color: var(--coral-rose); text-decoration: none; }
+    .section-action:hover { text-decoration: underline; }
+    .section-body { padding: 24px; }
+    
+    .status-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 20px; font-size: 12px; }
+    .status-badge.active { background: rgba(129,199,132,0.2); color: #4CAF50; }
+    .status-badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+    
+    .plan-card { display: flex; align-items: center; justify-content: space-between; padding: 24px; background: linear-gradient(135deg, rgba(255,213,217,0.2) 0%, rgba(238,231,255,0.2) 100%); border-radius: var(--radius-md); margin-bottom: 24px; }
+    .plan-info h4 { font-size: 18px; font-weight: 400; margin-bottom: 4px; }
+    .plan-info p { font-size: 13px; color: var(--text-secondary); }
+    .plan-price .amount { font-size: 28px; font-weight: 300; color: var(--coral-rose); }
+    .plan-price .period { font-size: 13px; color: var(--text-light); }
+    
+    .quick-actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .quick-action { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 24px; background: var(--soft-mist); border-radius: var(--radius-md); text-decoration: none; color: var(--text-primary); transition: all 0.3s ease; }
+    .quick-action:hover { background: linear-gradient(135deg, rgba(255,213,217,0.3) 0%, rgba(238,231,255,0.3) 100%); transform: translateY(-4px); }
+    .quick-action-icon { width: 48px; height: 48px; background: var(--white); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; }
+    .quick-action span { font-size: 14px; }
+    
+    .data-table { width: 100%; border-collapse: collapse; }
+    .data-table th, .data-table td { padding: 16px; text-align: left; font-size: 14px; border-bottom: 1px solid var(--soft-mist); }
+    .data-table th { font-weight: 400; color: var(--text-light); font-size: 12px; }
+    .data-table tr:last-child td { border-bottom: none; }
+    .data-table tr:hover td { background: var(--soft-mist); }
+    
+    .download-list { display: flex; flex-direction: column; gap: 12px; }
+    .download-item { display: flex; align-items: center; gap: 16px; padding: 16px; background: var(--soft-mist); border-radius: var(--radius-md); transition: all 0.3s ease; }
+    .download-item:hover { background: var(--peach-glow); }
+    .download-icon { width: 40px; height: 40px; background: var(--white); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; color: var(--coral-rose); }
+    .download-info { flex: 1; }
+    .download-info h5 { font-size: 14px; font-weight: 400; margin-bottom: 2px; }
+    .download-info p { font-size: 12px; color: var(--text-light); }
+    .download-btn { padding: 8px 16px; background: var(--white); border: 1px solid rgba(0,0,0,0.1); border-radius: 20px; font-size: 12px; color: var(--text-secondary); cursor: pointer; transition: all 0.3s ease; }
+    .download-btn:hover { background: var(--coral-rose); color: white; border-color: var(--coral-rose); }
+    
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 24px; border-radius: 50px; font-size: 14px; font-family: inherit; text-decoration: none; transition: all 0.3s ease; cursor: pointer; border: none; }
+    .btn-primary { background: var(--coral-rose); color: var(--white); }
+    .btn-primary:hover { background: var(--coral-rose-hover); transform: translateY(-2px); }
+    .btn-secondary { background: transparent; color: var(--text-secondary); border: 1px solid rgba(0,0,0,0.1); }
+    .btn-secondary:hover { background: var(--soft-mist); }
+    .btn-outline { background: transparent; color: var(--coral-rose); border: 1px solid var(--coral-rose); }
+    .btn-outline:hover { background: var(--coral-rose); color: white; }
+    
+    .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
+    
+    .form-group { margin-bottom: 20px; }
+    .form-label { display: block; font-size: 13px; color: var(--text-secondary); margin-bottom: 8px; }
+    .form-input { width: 100%; padding: 12px 16px; font-size: 14px; font-family: inherit; border: 1px solid rgba(0,0,0,0.1); border-radius: var(--radius-md); background: var(--soft-mist); transition: all 0.3s ease; outline: none; }
+    .form-input:focus { border-color: var(--coral-rose); background: var(--white); box-shadow: 0 0 0 3px rgba(255,140,165,0.1); }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    textarea.form-input { min-height: 120px; resize: vertical; }
+    
+    .contact-options { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+    .contact-checkbox { display: flex; align-items: center; gap: 8px; padding: 8px 16px; background: var(--soft-mist); border-radius: 20px; cursor: pointer; transition: all 0.3s ease; }
+    .contact-checkbox:hover { background: var(--peach-glow); }
+    .contact-checkbox input { display: none; }
+    .contact-checkbox span { font-size: 13px; }
+    .check-icon { opacity: 0; color: var(--coral-rose); transition: opacity 0.3s ease; }
+    .contact-checkbox input:checked ~ .check-icon { opacity: 1; }
+    
+    .toast { position: fixed; top: 24px; right: 24px; padding: 16px 24px; background: var(--white); border-radius: var(--radius-md); box-shadow: 0 10px 40px rgba(0,0,0,0.1); transform: translateX(120%); transition: transform 0.4s ease; z-index: 1000; }
+    .toast.show { transform: translateX(0); }
+    .toast.success { border-left: 4px solid var(--success); }
+    .toast.error { border-left: 4px solid var(--error); }
+    
+    .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 99; }
+    .sidebar-overlay.active { display: block; }
+    
+    @media (max-width: 1200px) { .dashboard-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 1024px) {
+      .sidebar { transform: translateX(-100%); }
+      .sidebar.active { transform: translateX(0); }
+      .main-content { margin-left: 0; }
+      .mobile-menu-btn { display: block; }
+      .search-box { display: none; }
+      .grid-2 { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 768px) {
+      .dashboard-grid { grid-template-columns: 1fr; }
+      .quick-actions { grid-template-columns: 1fr; }
+      .content { padding: 16px; }
+      .topbar { padding: 16px; }
+      .form-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+  <div class="dashboard">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <a href="flowgram-lp.html" class="sidebar-logo">FLOW<span>GRAM</span></a>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="nav-section">
+          <div class="nav-section-title">メイン</div>
+          <a href="#" class="nav-item active" onclick="showSection('dashboard', this)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            ダッシュボード
+          </a>
+          <a href="#" class="nav-item" onclick="showSection('orders', this)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            申込履歴
+          </a>
+          <a href="#" class="nav-item" onclick="showSection('downloads', this)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            ダウンロード資料
+            <span class="badge">2</span>
+          </a>
+        </div>
+        <div class="nav-section">
+          <div class="nav-section-title">アカウント</div>
+          <a href="#" class="nav-item" onclick="showSection('profile', this)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            アカウント情報
+          </a>
+          <a href="#" class="nav-item" onclick="showSection('billing', this)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+            請求情報
+          </a>
+        </div>
+        <div class="nav-section">
+          <div class="nav-section-title">サポート</div>
+          <a href="#" class="nav-item" onclick="showSection('support', this)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            お問い合わせ
+          </a>
+          <a href="https://line.me" target="_blank" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M12 2C6.48 2 2 5.58 2 10c0 2.03.94 3.89 2.5 5.33V20l3.5-2c1.27.42 2.61.67 4 .67 5.52 0 10-3.58 10-8S17.52 2 12 2z"/></svg>
+            LINEチャット
+          </a>
+        </div>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="user-card">
+          <div class="user-avatar">山</div>
+          <div class="user-info">
+            <div class="user-name">山田 花子</div>
+            <div class="user-plan">プレミアムプラン</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="mobile-menu-btn" onclick="toggleSidebar()"><span></span><span></span><span></span></button>
+          <h1 class="page-title" id="pageTitle">ダッシュボード</h1>
+        </div>
+        <div class="topbar-right">
+          <div class="search-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            <input type="text" placeholder="検索...">
+          </div>
+          <button class="topbar-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            <span class="notification-dot"></span>
+          </button>
+          <button class="topbar-btn" onclick="logout()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          </button>
+        </div>
+      </header>
+
+      <div class="content">
+        <!-- Dashboard -->
+        <div id="dashboardSection" class="page-section">
+          <div class="dashboard-grid">
+            <div class="stat-card"><div class="stat-icon peach">📊</div><div class="stat-value">12</div><div class="stat-label">今月の相談回数</div></div>
+            <div class="stat-card"><div class="stat-icon lavender">📝</div><div class="stat-value">3</div><div class="stat-label">動画添削</div></div>
+            <div class="stat-card"><div class="stat-icon mint">🎬</div><div class="stat-value">5</div><div class="stat-label">編集済み動画</div></div>
+            <div class="stat-card"><div class="stat-icon sky">📅</div><div class="stat-value">28日</div><div class="stat-label">次回更新まで</div></div>
+          </div>
+          <div class="section">
+            <div class="section-header"><h2 class="section-title">現在のプラン</h2><a href="#" class="section-action">プラン変更</a></div>
+            <div class="section-body">
+              <div class="plan-card">
+                <div class="plan-info"><h4>プレミアムプラン</h4><p>無制限チャット相談 ＋ 月1回運営レポート</p><span class="status-badge active">提供中</span></div>
+                <div class="plan-price"><div class="amount">¥4,980</div><div class="period">/月</div></div>
+              </div>
+              <div class="quick-actions">
+                <a href="#" class="quick-action"><div class="quick-action-icon">💬</div><span>LINEで相談</span></a>
+                <a href="#" class="quick-action"><div class="quick-action-icon">🎬</div><span>動画添削を依頼</span></a>
+                <a href="#" class="quick-action"><div class="quick-action-icon">📞</div><span>カウンセリング予約</span></a>
+              </div>
+            </div>
+          </div>
+          <div class="grid-2">
+            <div class="section">
+              <div class="section-header"><h2 class="section-title">最近の申込</h2><a href="#" class="section-action" onclick="showSection('orders', document.querySelector('.nav-item'))">すべて見る</a></div>
+              <div class="section-body">
+                <table class="data-table">
+                  <thead><tr><th>日付</th><th>内容</th><th>金額</th><th>状態</th></tr></thead>
+                  <tbody>
+                    <tr><td>2024/01/15</td><td>プレミアムプラン</td><td>¥4,980</td><td><span class="status-badge active">完了</span></td></tr>
+                    <tr><td>2024/01/10</td><td>動画編集 5本セット</td><td>¥22,500</td><td><span class="status-badge active">完了</span></td></tr>
+                    <tr><td>2024/01/05</td><td>動画添削</td><td>¥1,000</td><td><span class="status-badge active">完了</span></td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div class="section">
+              <div class="section-header"><h2 class="section-title">ダウンロード資料</h2><a href="#" class="section-action">すべて見る</a></div>
+              <div class="section-body">
+                <div class="download-list">
+                  <div class="download-item"><div class="download-icon">📄</div><div class="download-info"><h5>利用ガイド</h5><p>PDF • 2.3 MB</p></div><button class="download-btn">ダウンロード</button></div>
+                  <div class="download-item"><div class="download-icon">📊</div><div class="download-info"><h5>1月運営レポート</h5><p>PDF • 1.8 MB</p></div><button class="download-btn">ダウンロード</button></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Orders -->
+        <div id="ordersSection" class="page-section" style="display:none;">
+          <div class="section">
+            <div class="section-header"><h2 class="section-title">申込履歴</h2></div>
+            <div class="section-body">
+              <table class="data-table">
+                <thead><tr><th>申込日</th><th>プラン・サービス名</th><th>決済金額</th><th>決済方法</th><th>ステータス</th></tr></thead>
+                <tbody>
+                  <tr><td>2024/01/15</td><td>プレミアムプラン（月額）</td><td>¥4,980</td><td>クレジットカード</td><td><span class="status-badge active">提供中</span></td></tr>
+                  <tr><td>2024/01/10</td><td>動画編集 5本セット</td><td>¥22,500</td><td>クレジットカード</td><td><span class="status-badge active">完了</span></td></tr>
+                  <tr><td>2024/01/05</td><td>動画添削</td><td>¥1,000</td><td>クレジットカード</td><td><span class="status-badge active">完了</span></td></tr>
+                  <tr><td>2024/01/01</td><td>個別カウンセリング（15分）</td><td>¥600</td><td>クレジットカード</td><td><span class="status-badge active">完了</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Downloads -->
+        <div id="downloadsSection" class="page-section" style="display:none;">
+          <div class="section">
+            <div class="section-header"><h2 class="section-title">ダウンロード資料</h2></div>
+            <div class="section-body">
+              <div class="download-list">
+                <div class="download-item"><div class="download-icon">📄</div><div class="download-info"><h5>FLOWGRAM 利用ガイド</h5><p>サービスの使い方マニュアル • PDF • 2.3 MB</p></div><button class="download-btn">ダウンロード</button></div>
+                <div class="download-item"><div class="download-icon">📊</div><div class="download-info"><h5>1月運営レポート</h5><p>2024年1月の運営分析レポート • PDF • 1.8 MB</p></div><button class="download-btn">ダウンロード</button></div>
+                <div class="download-item"><div class="download-icon">🎁</div><div class="download-info"><h5>SNS運用チェックリスト</h5><p>会員限定特典資料 • PDF • 0.5 MB</p></div><button class="download-btn">ダウンロード</button></div>
+                <div class="download-item"><div class="download-icon">🎬</div><div class="download-info"><h5>編集済み動画（5本セット）</h5><p>2024/01/10 納品分 • ZIP • 245 MB</p></div><button class="download-btn">ダウンロード</button></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Profile -->
+        <div id="profileSection" class="page-section" style="display:none;">
+          <div class="section">
+            <div class="section-header"><h2 class="section-title">アカウント情報</h2></div>
+            <div class="section-body">
+              <form id="profileForm">
+                <div class="form-row">
+                  <div class="form-group"><label class="form-label">姓</label><input type="text" class="form-input" value="山田"></div>
+                  <div class="form-group"><label class="form-label">名</label><input type="text" class="form-input" value="花子"></div>
+                </div>
+                <div class="form-group"><label class="form-label">メールアドレス（ログインID）</label><input type="email" class="form-input" value="hanako@example.com"></div>
+                <div class="form-group"><label class="form-label">電話番号（任意）</label><input type="tel" class="form-input" value="090-1234-5678"></div>
+                <div class="form-group"><label class="form-label">パスワード</label><input type="password" class="form-input" value="••••••••"><a href="#" class="section-action" style="display:block;margin-top:8px;">パスワードを変更</a></div>
+                <button type="submit" class="btn btn-primary">変更を保存</button>
+              </form>
+            </div>
+          </div>
+          <div class="section" style="border:1px solid var(--error);">
+            <div class="section-header"><h2 class="section-title" style="color:var(--error);">退会・アカウント削除</h2></div>
+            <div class="section-body">
+              <p style="font-size:14px;color:var(--text-secondary);margin-bottom:16px;">アカウントを削除すると、すべてのデータが完全に削除されます。この操作は取り消せません。</p>
+              <button class="btn btn-secondary" style="border-color:var(--error);color:var(--error);">アカウントを削除する</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Billing -->
+        <div id="billingSection" class="page-section" style="display:none;">
+          <div class="section">
+            <div class="section-header"><h2 class="section-title">請求情報</h2></div>
+            <div class="section-body">
+              <div class="plan-card" style="margin-bottom:32px;">
+                <div class="plan-info"><h4>今月の請求額</h4><p>次回請求日: 2024年2月15日</p></div>
+                <div class="plan-price"><div class="amount">¥4,980</div></div>
+              </div>
+              <h3 style="font-size:16px;font-weight:400;margin-bottom:16px;">支払い履歴</h3>
+              <table class="data-table">
+                <thead><tr><th>請求日</th><th>内容</th><th>金額</th><th>状態</th></tr></thead>
+                <tbody>
+                  <tr><td>2024/01/15</td><td>プレミアムプラン（1月分）</td><td>¥4,980</td><td><span class="status-badge active">支払済</span></td></tr>
+                  <tr><td>2024/01/10</td><td>動画編集 5本セット</td><td>¥22,500</td><td><span class="status-badge active">支払済</span></td></tr>
+                  <tr><td>2023/12/15</td><td>プレミアムプラン（12月分）</td><td>¥4,980</td><td><span class="status-badge active">支払済</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Support -->
+        <div id="supportSection" class="page-section" style="display:none;">
+          <div class="section">
+            <div class="section-header"><h2 class="section-title">お問い合わせ</h2></div>
+            <div class="section-body">
+              <form id="supportForm">
+                <div class="form-group">
+                  <label class="form-label">相談内容（複数選択可）</label>
+                  <div class="contact-options">
+                    <label class="contact-checkbox"><input type="checkbox" name="topic" value="sns"><span>SNS相談</span><span class="check-icon">✓</span></label>
+                    <label class="contact-checkbox"><input type="checkbox" name="topic" value="review"><span>動画添削</span><span class="check-icon">✓</span></label>
+                    <label class="contact-checkbox"><input type="checkbox" name="topic" value="edit"><span>動画編集</span><span class="check-icon">✓</span></label>
+                    <label class="contact-checkbox"><input type="checkbox" name="topic" value="counseling"><span>カウンセリング</span><span class="check-icon">✓</span></label>
+                    <label class="contact-checkbox"><input type="checkbox" name="topic" value="subscription"><span>サブスク契約・解約</span><span class="check-icon">✓</span></label>
+                    <label class="contact-checkbox"><input type="checkbox" name="topic" value="other"><span>その他</span><span class="check-icon">✓</span></label>
+                  </div>
+                </div>
+                <div class="form-group"><label class="form-label">件名</label><input type="text" class="form-input" placeholder="お問い合わせの件名"></div>
+                <div class="form-group"><label class="form-label">お問い合わせ内容</label><textarea class="form-input" placeholder="詳細をご記入ください"></textarea></div>
+                <button type="submit" class="btn btn-primary">送信する</button>
+              </form>
+              <div style="margin-top:40px;padding-top:32px;border-top:1px solid var(--soft-mist);">
+                <h3 style="font-size:16px;font-weight:400;margin-bottom:16px;">LINEでのお問い合わせ</h3>
+                <p style="font-size:14px;color:var(--text-secondary);margin-bottom:16px;">より早くサポートが必要な場合は、公式LINEからもお問い合わせいただけます。</p>
+                <a href="https://line.me" target="_blank" class="btn btn-outline">LINEで相談する</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="toast" id="toast"><span id="toastMessage"></span></div>
+
+  <script>
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('active');
+      document.getElementById('sidebarOverlay').classList.toggle('active');
+    }
+    function showSection(section, el) {
+      document.querySelectorAll('.page-section').forEach(s => s.style.display = 'none');
+      document.getElementById(section + 'Section').style.display = 'block';
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      if (el) el.classList.add('active');
+      const titles = { dashboard:'ダッシュボード', orders:'申込履歴', downloads:'ダウンロード資料', profile:'アカウント情報', billing:'請求情報', support:'お問い合わせ' };
+      document.getElementById('pageTitle').textContent = titles[section];
+      if (window.innerWidth <= 1024) toggleSidebar();
+    }
+    function logout() {
+      showToast('ログアウトしました', 'success');
+      setTimeout(() => window.location.href = 'flowgram-login.html', 1000);
+    }
+    function showToast(message, type) {
+      const toast = document.getElementById('toast');
+      document.getElementById('toastMessage').textContent = message;
+      toast.className = 'toast ' + type + ' show';
+      setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+    document.getElementById('profileForm').addEventListener('submit', e => { e.preventDefault(); showToast('変更を保存しました', 'success'); });
+    document.getElementById('supportForm').addEventListener('submit', e => { e.preventDefault(); showToast('お問い合わせを送信しました', 'success'); e.target.reset(); });
+    document.querySelectorAll('.contact-checkbox input').forEach(c => c.addEventListener('change', function() { this.closest('.contact-checkbox').style.background = this.checked ? 'var(--peach-glow)' : 'var(--soft-mist)'; }));
+  </script>
+</body>
+</html>

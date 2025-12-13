@@ -74,6 +74,16 @@ class DownloadController extends Controller
             ->with('success', 'ファイル情報を更新しました');
     }
 
+    public function download(Download $download)
+    {
+        if (!Storage::disk('local')->exists($download->file_path)) {
+            return back()->with('error', 'ファイルが見つかりません。');
+        }
+
+        $filePath = Storage::disk('local')->path($download->file_path);
+        return response()->download($filePath, $download->file_name);
+    }
+
     public function destroy(Download $download)
     {
         if ($download->file_path) {

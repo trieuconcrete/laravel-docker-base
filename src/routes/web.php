@@ -195,6 +195,7 @@ Route::middleware(['auth'])->group(function () {
         Route::prefix('downloads')->name('downloads.')->group(function () {
             Route::get('/', [DownloadController::class, 'index'])->name('index');
             Route::post('/', [DownloadController::class, 'store'])->name('store');
+            Route::get('/{download}/download', [DownloadController::class, 'download'])->name('download');
             Route::put('/{download}', [DownloadController::class, 'update'])->name('update');
             Route::delete('/{download}', [DownloadController::class, 'destroy'])->name('destroy');
         });

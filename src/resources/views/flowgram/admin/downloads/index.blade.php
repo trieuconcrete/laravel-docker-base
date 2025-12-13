@@ -59,7 +59,12 @@
               </td>
               <td>{{ $download->download_count }}</td>
               <td>{{ $download->created_at->format('Y/m/d') }}</td>
-              <td>
+              <td style="white-space:nowrap;">
+                @if($download->fileExists())
+                  <a href="{{ route('admin.downloads.download', $download) }}" class="btn btn-sm btn-primary" title="ダウンロード">⬇</a>
+                @else
+                  <span class="btn btn-sm" style="opacity:0.3;cursor:not-allowed;" title="ファイルなし">⬇</span>
+                @endif
                 <button class="btn btn-sm btn-secondary" onclick="openEditModal({{ json_encode($download) }})">編集</button>
                 <form method="POST" action="{{ route('admin.downloads.destroy', $download) }}" style="display:inline;" onsubmit="return confirm('削除しますか？')">
                   @csrf

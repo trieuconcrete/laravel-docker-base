@@ -133,5 +133,25 @@ class Download extends Model
     {
         $this->increment('download_count');
     }
+
+    /**
+     * Check if the file exists on disk
+     */
+    public function fileExists(): bool
+    {
+        if (!$this->file_path) {
+            return false;
+        }
+        
+        return \Illuminate\Support\Facades\Storage::disk('local')->exists($this->file_path);
+    }
+
+    /**
+     * Get the full file path
+     */
+    public function getFullPathAttribute(): string
+    {
+        return \Illuminate\Support\Facades\Storage::disk('local')->path($this->file_path);
+    }
 }
 

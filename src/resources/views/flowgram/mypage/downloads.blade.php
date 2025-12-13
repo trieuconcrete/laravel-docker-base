@@ -26,7 +26,11 @@
                 <h5>{{ $download->title }}</h5>
                 <p>{{ $download->description }} • {{ strtoupper($download->file_type) }} • {{ $download->formatted_size }}</p>
               </div>
-              <a href="{{ route('mypage.download', $download) }}" class="download-btn">ダウンロード</a>
+              @if($download->fileExists())
+                <a href="{{ route('mypage.download', $download) }}" class="download-btn">ダウンロード</a>
+              @else
+                <span class="download-btn" style="opacity:0.5;cursor:not-allowed;" title="ファイル準備中">準備中</span>
+              @endif
             </div>
           @endforeach
         </div>

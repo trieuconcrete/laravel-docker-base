@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>管理画面 | FLOWGRAM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&family=Noto+Sans+JP:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root{--peach-glow:#FFD5D9;--blush-pink:#F8E7EF;--lavender-haze:#EEE7FF;--soft-mist:#F5F4F6;--white:#FFFFFF;--coral-rose:#FF8CA5;--coral-rose-hover:#FF7A96;--text-primary:#2F2F2F;--text-secondary:#666666;--text-light:#888888;--error:#E57373;--success:#81C784;--warning:#FFB74D;--info:#64B5F6;--radius-sm:8px;--radius-md:12px;--radius-lg:16px;--sidebar-width:260px}
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'Noto Sans JP',sans-serif;color:var(--text-primary);line-height:1.6;background:#f8f9fa;min-height:100vh}
+    .admin-layout{display:flex;min-height:100vh}
+    .sidebar{width:var(--sidebar-width);background:var(--text-primary);position:fixed;top:0;left:0;height:100vh;display:flex;flex-direction:column;z-index:100;transition:transform .3s ease}
+    .sidebar-header{padding:20px 24px;border-bottom:1px solid rgba(255,255,255,.1)}
+    .sidebar-logo{font-family:'Montserrat',sans-serif;font-size:20px;letter-spacing:2px;color:var(--white);text-decoration:none;display:flex;align-items:center;gap:8px}
+    .admin-badge{background:var(--coral-rose);color:white;font-size:10px;padding:2px 8px;border-radius:10px;margin-left:8px}
+    .sidebar-nav{flex:1;padding:16px 12px;overflow-y:auto}
+    .nav-section{margin-bottom:24px}
+    .nav-section-title{font-size:10px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:1.5px;padding:0 12px;margin-bottom:8px}
+    .nav-item{display:flex;align-items:center;gap:12px;padding:10px 12px;color:rgba(255,255,255,.7);text-decoration:none;font-size:13px;border-radius:var(--radius-sm);transition:all .2s ease;margin-bottom:2px}
+    .nav-item:hover{background:rgba(255,255,255,.1);color:var(--white)}
+    .nav-item.active{background:var(--coral-rose);color:var(--white)}
+    .nav-item svg{width:18px;height:18px;flex-shrink:0;opacity:.8}
+    .nav-item .badge{margin-left:auto;background:rgba(255,255,255,.2);color:white;font-size:10px;padding:2px 6px;border-radius:8px}
+    .sidebar-footer{padding:16px;border-top:1px solid rgba(255,255,255,.1)}
+    .admin-user{display:flex;align-items:center;gap:12px}
+    .admin-avatar{width:36px;height:36px;border-radius:50%;background:var(--coral-rose);display:flex;align-items:center;justify-content:center;color:white;font-size:14px}
+    .admin-info{flex:1}
+    .admin-name{font-size:13px;color:var(--white)}
+    .admin-role{font-size:11px;color:rgba(255,255,255,.5)}
+    .main-content{flex:1;margin-left:var(--sidebar-width)}
+    .topbar{background:var(--white);padding:12px 24px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(0,0,0,.05);position:sticky;top:0;z-index:50}
+    .topbar-left{display:flex;align-items:center;gap:16px}
+    .mobile-menu-btn{display:none;background:none;border:none;cursor:pointer;padding:8px}
+    .mobile-menu-btn span{display:block;width:20px;height:2px;background:var(--text-primary);margin:4px 0}
+    .breadcrumb{font-size:13px;color:var(--text-light)}
+    .breadcrumb a{color:var(--text-secondary);text-decoration:none}
+    .topbar-right{display:flex;align-items:center;gap:12px}
+    .search-box{display:flex;align-items:center;gap:8px;background:var(--soft-mist);padding:8px 14px;border-radius:8px;width:220px}
+    .search-box input{border:none;background:transparent;font-size:13px;font-family:inherit;outline:none;width:100%}
+    .search-box svg{color:var(--text-light);width:16px;height:16px}
+    .topbar-btn{width:36px;height:36px;border-radius:8px;border:none;background:var(--soft-mist);cursor:pointer;display:flex;align-items:center;justify-content:center;position:relative;transition:all .2s ease}
+    .topbar-btn:hover{background:var(--peach-glow)}
+    .topbar-btn svg{width:18px;height:18px;color:var(--text-secondary)}
+    .notification-dot{position:absolute;top:6px;right:6px;width:6px;height:6px;background:var(--coral-rose);border-radius:50%}
+    .content{padding:24px}
+    .page-header{margin-bottom:24px}
+    .page-title{font-size:22px;font-weight:400;margin-bottom:4px}
+    .page-subtitle{font-size:13px;color:var(--text-light)}
+    .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+    .stat-card{background:var(--white);padding:20px;border-radius:var(--radius-md);display:flex;align-items:flex-start;gap:16px}
+    .stat-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px}
+    .stat-icon.rose{background:rgba(255,140,165,.15)}
+    .stat-icon.blue{background:rgba(100,181,246,.15)}
+    .stat-icon.green{background:rgba(129,199,132,.15)}
+    .stat-icon.orange{background:rgba(255,183,77,.15)}
+    .stat-value{font-size:24px;font-weight:500;margin-bottom:2px}
+    .stat-label{font-size:12px;color:var(--text-light)}
+    .stat-change{font-size:11px;margin-top:4px}
+    .stat-change.up{color:var(--success)}
+    .stat-change.down{color:var(--error)}
+    .card{background:var(--white);border-radius:var(--radius-md);margin-bottom:16px}
+    .card-header{padding:16px 20px;border-bottom:1px solid var(--soft-mist);display:flex;justify-content:space-between;align-items:center}
+    .card-title{font-size:14px;font-weight:500}
+    .card-body{padding:20px}
+    .data-table{width:100%;border-collapse:collapse}
+    .data-table th,.data-table td{padding:12px 16px;text-align:left;font-size:13px;border-bottom:1px solid var(--soft-mist)}
+    .data-table th{font-weight:500;color:var(--text-light);font-size:11px;text-transform:uppercase;background:var(--soft-mist)}
+    .data-table tr:last-child td{border-bottom:none}
+    .data-table tbody tr:hover{background:rgba(255,213,217,.1)}
+    .status{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:12px;font-size:11px;font-weight:500}
+    .status.active{background:rgba(129,199,132,.15);color:#43A047}
+    .status.pending{background:rgba(255,183,77,.15);color:#F57C00}
+    .status.completed{background:rgba(100,181,246,.15);color:#1976D2}
+    .status::before{content:'';width:5px;height:5px;border-radius:50%;background:currentColor}
+    .user-cell{display:flex;align-items:center;gap:10px}
+    .user-cell-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--peach-glow),var(--lavender-haze));display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--coral-rose)}
+    .user-cell-name{font-size:13px}
+    .user-cell-email{font-size:11px;color:var(--text-light)}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:8px 16px;border-radius:8px;font-size:13px;font-family:inherit;text-decoration:none;transition:all .2s ease;cursor:pointer;border:none}
+    .btn-sm{padding:6px 12px;font-size:12px}
+    .btn-primary{background:var(--coral-rose);color:var(--white)}
+    .btn-primary:hover{background:var(--coral-rose-hover)}
+    .btn-secondary{background:var(--soft-mist);color:var(--text-secondary)}
+    .btn-outline{background:transparent;color:var(--text-secondary);border:1px solid rgba(0,0,0,.15)}
+    .form-group{margin-bottom:16px}
+    .form-label{display:block;font-size:12px;font-weight:500;color:var(--text-secondary);margin-bottom:6px}
+    .form-input{width:100%;padding:10px 14px;font-size:13px;font-family:inherit;border:1px solid rgba(0,0,0,.12);border-radius:8px;background:var(--white);outline:none}
+    .form-input:focus{border-color:var(--coral-rose);box-shadow:0 0 0 3px rgba(255,140,165,.1)}
+    .form-select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:36px}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:1000;padding:24px}
+    .modal-overlay.active{display:flex}
+    .modal{background:var(--white);border-radius:var(--radius-lg);width:100%;max-width:500px;max-height:90vh;overflow:hidden}
+    .modal-header{padding:16px 20px;border-bottom:1px solid var(--soft-mist);display:flex;justify-content:space-between;align-items:center}
+    .modal-title{font-size:16px;font-weight:500}
+    .modal-close{background:none;border:none;cursor:pointer;padding:4px;color:var(--text-light);font-size:18px}
+    .modal-body{padding:20px;overflow-y:auto;max-height:calc(90vh - 130px)}
+    .modal-footer{padding:16px 20px;border-top:1px solid var(--soft-mist);display:flex;justify-content:flex-end;gap:8px}
+    .grid-2{display:grid;grid-template-columns:2fr 1fr;gap:16px}
+    .filter-bar{display:flex;align-items:center;gap:12px;padding:16px 20px;background:var(--soft-mist);border-radius:var(--radius-md) var(--radius-md) 0 0;flex-wrap:wrap}
+    .filter-bar .form-input{background:var(--white);padding:8px 12px;font-size:12px}
+    .pagination{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-top:1px solid var(--soft-mist)}
+    .pagination-info{font-size:12px;color:var(--text-light)}
+    .pagination-buttons{display:flex;gap:4px}
+    .pagination-btn{width:32px;height:32px;border:1px solid rgba(0,0,0,.1);background:var(--white);border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:12px}
+    .pagination-btn.active{background:var(--coral-rose);color:white;border-color:var(--coral-rose)}
+    .tabs{display:flex;gap:4px;border-bottom:1px solid var(--soft-mist);padding:0 20px}
+    .tab{padding:12px 16px;font-size:13px;color:var(--text-secondary);background:none;border:none;cursor:pointer;position:relative}
+    .tab.active{color:var(--coral-rose)}
+    .tab.active::after{content:'';position:absolute;bottom:-1px;left:0;right:0;height:2px;background:var(--coral-rose)}
+    .quick-list{}
+    .quick-item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--soft-mist)}
+    .quick-item:last-child{border-bottom:none}
+    .quick-item-icon{width:36px;height:36px;border-radius:8px;background:var(--soft-mist);display:flex;align-items:center;justify-content:center;font-size:16px}
+    .quick-item-content{flex:1}
+    .quick-item-title{font-size:13px;margin-bottom:2px}
+    .quick-item-meta{font-size:11px;color:var(--text-light)}
+    .quick-item-action{font-size:12px;color:var(--coral-rose);text-decoration:none}
+    .toast{position:fixed;top:24px;right:24px;padding:14px 20px;background:var(--white);border-radius:8px;box-shadow:0 10px 40px rgba(0,0,0,.15);transform:translateX(120%);transition:transform .3s ease;z-index:1100}
+    .toast.show{transform:translateX(0)}
+    .toast.success{border-left:4px solid var(--success)}
+    .sidebar-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);z-index:99}
+    .sidebar-overlay.active{display:block}
+    @media(max-width:1200px){.stats-grid{grid-template-columns:repeat(2,1fr)}.grid-2{grid-template-columns:1fr}}
+    @media(max-width:1024px){.sidebar{transform:translateX(-100%)}.sidebar.active{transform:translateX(0)}.main-content{margin-left:0}.mobile-menu-btn{display:block}.search-box{display:none}}
+    @media(max-width:768px){.stats-grid{grid-template-columns:1fr}.content{padding:16px}.form-row{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+  <div class="admin-layout">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header"><a href="flowgram-lp.html" class="sidebar-logo">FLOW<span>GRAM</span><span class="admin-badge">ADMIN</span></a></div>
+      <nav class="sidebar-nav">
+        <div class="nav-section">
+          <div class="nav-section-title">ダッシュボード</div>
+          <a href="#" class="nav-item active" onclick="showSection('dashboard',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>概要</a>
+        </div>
+        <div class="nav-section">
+          <div class="nav-section-title">会員管理</div>
+          <a href="#" class="nav-item" onclick="showSection('users',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>会員一覧<span class="badge">156</span></a>
+          <a href="#" class="nav-item" onclick="showSection('orders',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>申込管理<span class="badge">12</span></a>
+        </div>
+        <div class="nav-section">
+          <div class="nav-section-title">コンテンツ</div>
+          <a href="#" class="nav-item" onclick="showSection('files',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>資料アップロード</a>
+          <a href="#" class="nav-item" onclick="showSection('inquiries',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>問い合わせ<span class="badge">3</span></a>
+        </div>
+      </nav>
+      <div class="sidebar-footer"><div class="admin-user"><div class="admin-avatar">管</div><div class="admin-info"><div class="admin-name">管理者</div><div class="admin-role">Super Admin</div></div></div></div>
+    </aside>
+    <main class="main-content">
+      <header class="topbar">
+        <div class="topbar-left"><button class="mobile-menu-btn" onclick="toggleSidebar()"><span></span><span></span><span></span></button><div class="breadcrumb"><a href="#">ホーム</a> / <span id="breadcrumbCurrent">ダッシュボード</span></div></div>
+        <div class="topbar-right">
+          <div class="search-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input type="text" placeholder="検索..."></div>
+          <button class="topbar-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="notification-dot"></span></button>
+          <button class="topbar-btn" onclick="logout()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></button>
+        </div>
+      </header>
+      <div class="content">
+        <div id="dashboardSection" class="page-section">
+          <div class="page-header"><h1 class="page-title">ダッシュボード</h1><p class="page-subtitle">FLOWGRAMの概要</p></div>
+          <div class="stats-grid">
+            <div class="stat-card"><div class="stat-icon rose">👥</div><div><div class="stat-value">156</div><div class="stat-label">総会員数</div><div class="stat-change up">↑ 12%</div></div></div>
+            <div class="stat-card"><div class="stat-icon blue">💳</div><div><div class="stat-value">¥487,200</div><div class="stat-label">今月の売上</div><div class="stat-change up">↑ 8%</div></div></div>
+            <div class="stat-card"><div class="stat-icon green">📝</div><div><div class="stat-value">45</div><div class="stat-label">今月の申込</div><div class="stat-change up">↑ 15%</div></div></div>
+            <div class="stat-card"><div class="stat-icon orange">💬</div><div><div class="stat-value">3</div><div class="stat-label">未対応問い合わせ</div><div class="stat-change down">要対応</div></div></div>
+          </div>
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-header"><h3 class="card-title">最近の申込</h3><a href="#" class="btn btn-sm btn-outline">すべて見る</a></div>
+              <div class="card-body" style="padding:0;">
+                <table class="data-table"><thead><tr><th>会員</th><th>内容</th><th>金額</th><th>状態</th></tr></thead><tbody>
+                  <tr><td><div class="user-cell"><div class="user-cell-avatar">山</div><div class="user-cell-name">山田 花子</div></div></td><td>プレミアムプラン</td><td>¥4,980</td><td><span class="status active">提供中</span></td></tr>
+                  <tr><td><div class="user-cell"><div class="user-cell-avatar">佐</div><div class="user-cell-name">佐藤 美咲</div></div></td><td>動画編集5本</td><td>¥22,500</td><td><span class="status pending">制作中</span></td></tr>
+                  <tr><td><div class="user-cell"><div class="user-cell-avatar">田</div><div class="user-cell-name">田中 太郎</div></div></td><td>ベーシックプラン</td><td>¥1,980</td><td><span class="status active">提供中</span></td></tr>
+                </tbody></table>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header"><h3 class="card-title">未対応の問い合わせ</h3></div>
+              <div class="card-body">
+                <div class="quick-list">
+                  <div class="quick-item"><div class="quick-item-icon">💬</div><div class="quick-item-content"><div class="quick-item-title">解約について</div><div class="quick-item-meta">山田花子 • 2時間前</div></div><a href="#" class="quick-item-action">対応</a></div>
+                  <div class="quick-item"><div class="quick-item-icon">🎬</div><div class="quick-item-content"><div class="quick-item-title">動画編集の納期</div><div class="quick-item-meta">佐藤美咲 • 5時間前</div></div><a href="#" class="quick-item-action">対応</a></div>
+                  <div class="quick-item"><div class="quick-item-icon">📱</div><div class="quick-item-content"><div class="quick-item-title">SNS相談の件</div><div class="quick-item-meta">鈴木一郎 • 1日前</div></div><a href="#" class="quick-item-action">対応</a></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="usersSection" class="page-section" style="display:none;">
+          <div class="page-header" style="display:flex;justify-content:space-between;align-items:center;"><div><h1 class="page-title">会員一覧</h1><p class="page-subtitle">登録会員の管理</p></div><button class="btn btn-primary" onclick="openModal('userModal')">+ 新規追加</button></div>
+          <div class="card">
+            <div class="filter-bar"><input type="text" class="form-input" placeholder="名前・メールで検索..." style="width:240px;"><select class="form-input form-select" style="width:150px;"><option>すべてのプラン</option><option>プレミアム</option><option>ベーシック</option></select><select class="form-input form-select" style="width:140px;"><option>すべての状態</option><option>提供中</option><option>解約申請中</option></select></div>
+            <div style="overflow-x:auto;"><table class="data-table"><thead><tr><th>会員</th><th>プラン</th><th>登録日</th><th>状態</th><th>操作</th></tr></thead><tbody>
+              <tr><td><div class="user-cell"><div class="user-cell-avatar">山</div><div><div class="user-cell-name">山田 花子</div><div class="user-cell-email">hanako@example.com</div></div></div></td><td>プレミアム</td><td>2024/01/15</td><td><span class="status active">提供中</span></td><td><button class="btn btn-sm btn-secondary" onclick="openModal('userModal')">編集</button></td></tr>
+              <tr><td><div class="user-cell"><div class="user-cell-avatar">佐</div><div><div class="user-cell-name">佐藤 美咲</div><div class="user-cell-email">misaki@example.com</div></div></div></td><td>プレミアム</td><td>2024/01/10</td><td><span class="status active">提供中</span></td><td><button class="btn btn-sm btn-secondary" onclick="openModal('userModal')">編集</button></td></tr>
+              <tr><td><div class="user-cell"><div class="user-cell-avatar">田</div><div><div class="user-cell-name">田中 太郎</div><div class="user-cell-email">taro@example.com</div></div></div></td><td>ベーシック</td><td>2024/01/05</td><td><span class="status active">提供中</span></td><td><button class="btn btn-sm btn-secondary" onclick="openModal('userModal')">編集</button></td></tr>
+            </tbody></table></div>
+            <div class="pagination"><div class="pagination-info">1-10 / 156件</div><div class="pagination-buttons"><button class="pagination-btn">←</button><button class="pagination-btn active">1</button><button class="pagination-btn">2</button><button class="pagination-btn">3</button><button class="pagination-btn">→</button></div></div>
+          </div>
+        </div>
+        <div id="ordersSection" class="page-section" style="display:none;">
+          <div class="page-header"><h1 class="page-title">申込管理</h1><p class="page-subtitle">申込・決済情報の管理（手動更新）</p></div>
+          <div class="card">
+            <div class="filter-bar"><input type="text" class="form-input" placeholder="会員名・内容で検索..." style="width:240px;"><select class="form-input form-select" style="width:150px;"><option>すべての状態</option><option>受付済</option><option>決済確認済</option><option>提供中</option></select></div>
+            <div style="overflow-x:auto;"><table class="data-table"><thead><tr><th>申込日</th><th>会員</th><th>内容</th><th>金額</th><th>決済方法</th><th>状態</th><th>操作</th></tr></thead><tbody>
+              <tr><td>2024/01/15</td><td><div class="user-cell"><div class="user-cell-avatar">山</div><div class="user-cell-name">山田 花子</div></div></td><td>プレミアムプラン</td><td>¥4,980</td><td>クレジット</td><td><span class="status active">提供中</span></td><td><button class="btn btn-sm btn-secondary" onclick="openModal('orderModal')">編集</button></td></tr>
+              <tr><td>2024/01/14</td><td><div class="user-cell"><div class="user-cell-avatar">佐</div><div class="user-cell-name">佐藤 美咲</div></div></td><td>動画編集5本</td><td>¥22,500</td><td>クレジット</td><td><span class="status pending">制作中</span></td><td><button class="btn btn-sm btn-secondary" onclick="openModal('orderModal')">編集</button></td></tr>
+            </tbody></table></div>
+            <div class="pagination"><div class="pagination-info">1-10 / 45件</div><div class="pagination-buttons"><button class="pagination-btn">←</button><button class="pagination-btn active">1</button><button class="pagination-btn">2</button><button class="pagination-btn">→</button></div></div>
+          </div>
+        </div>
+        <div id="filesSection" class="page-section" style="display:none;">
+          <div class="page-header" style="display:flex;justify-content:space-between;align-items:center;"><div><h1 class="page-title">資料アップロード</h1><p class="page-subtitle">会員向けダウンロード資料の管理</p></div><button class="btn btn-primary" onclick="openModal('fileModal')">+ ファイル追加</button></div>
+          <div class="card"><div style="overflow-x:auto;"><table class="data-table"><thead><tr><th>ファイル名</th><th>種類</th><th>対象プラン</th><th>アップロード日</th><th>操作</th></tr></thead><tbody>
+            <tr><td>📄 FLOWGRAM 利用ガイド.pdf</td><td>PDF</td><td>全プラン</td><td>2024/01/01</td><td><button class="btn btn-sm btn-secondary">編集</button> <button class="btn btn-sm btn-outline">削除</button></td></tr>
+            <tr><td>📊 1月運営レポート.pdf</td><td>PDF</td><td>プレミアム</td><td>2024/01/31</td><td><button class="btn btn-sm btn-secondary">編集</button> <button class="btn btn-sm btn-outline">削除</button></td></tr>
+          </tbody></table></div></div>
+        </div>
+        <div id="inquiriesSection" class="page-section" style="display:none;">
+          <div class="page-header"><h1 class="page-title">問い合わせ管理</h1><p class="page-subtitle">会員からの問い合わせ一覧</p></div>
+          <div class="card">
+            <div class="tabs"><button class="tab active">未対応 (3)</button><button class="tab">対応中 (2)</button><button class="tab">完了</button></div>
+            <div style="overflow-x:auto;"><table class="data-table"><thead><tr><th>受付日</th><th>会員</th><th>カテゴリ</th><th>件名</th><th>状態</th><th>操作</th></tr></thead><tbody>
+              <tr><td>2024/01/15 14:30</td><td><div class="user-cell"><div class="user-cell-avatar">山</div><div class="user-cell-name">山田 花子</div></div></td><td>サブスク契約・解約</td><td>解約について</td><td><span class="status pending">未対応</span></td><td><button class="btn btn-sm btn-primary">対応</button></td></tr>
+              <tr><td>2024/01/15 10:15</td><td><div class="user-cell"><div class="user-cell-avatar">佐</div><div class="user-cell-name">佐藤 美咲</div></div></td><td>動画編集</td><td>動画編集の納期について</td><td><span class="status pending">未対応</span></td><td><button class="btn btn-sm btn-primary">対応</button></td></tr>
+            </tbody></table></div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+  <div class="modal-overlay" id="userModal"><div class="modal"><div class="modal-header"><h3 class="modal-title">会員情報編集</h3><button class="modal-close" onclick="closeModal('userModal')">✕</button></div><div class="modal-body"><div class="form-row"><div class="form-group"><label class="form-label">姓</label><input type="text" class="form-input" value="山田"></div><div class="form-group"><label class="form-label">名</label><input type="text" class="form-input" value="花子"></div></div><div class="form-group"><label class="form-label">メールアドレス</label><input type="email" class="form-input" value="hanako@example.com"></div><div class="form-row"><div class="form-group"><label class="form-label">プラン</label><select class="form-input form-select"><option selected>プレミアム</option><option>ベーシック</option><option>無料会員</option></select></div><div class="form-group"><label class="form-label">ステータス</label><select class="form-input form-select"><option selected>提供中</option><option>解約申請中</option><option>解約済</option></select></div></div></div><div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('userModal')">キャンセル</button><button class="btn btn-primary" onclick="saveData('userModal')">保存</button></div></div></div>
+  <div class="modal-overlay" id="orderModal"><div class="modal"><div class="modal-header"><h3 class="modal-title">申込情報編集</h3><button class="modal-close" onclick="closeModal('orderModal')">✕</button></div><div class="modal-body"><div class="form-group"><label class="form-label">会員名</label><input type="text" class="form-input" value="山田 花子" readonly></div><div class="form-row"><div class="form-group"><label class="form-label">申込日</label><input type="date" class="form-input" value="2024-01-15"></div><div class="form-group"><label class="form-label">金額</label><input type="text" class="form-input" value="¥4,980"></div></div><div class="form-group"><label class="form-label">内容</label><input type="text" class="form-input" value="プレミアムプラン"></div><div class="form-row"><div class="form-group"><label class="form-label">決済方法</label><select class="form-input form-select"><option selected>クレジットカード</option><option>銀行振込</option></select></div><div class="form-group"><label class="form-label">ステータス</label><select class="form-input form-select"><option>受付済</option><option>決済確認済</option><option selected>提供中</option><option>完了</option></select></div></div></div><div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('orderModal')">キャンセル</button><button class="btn btn-primary" onclick="saveData('orderModal')">保存</button></div></div></div>
+  <div class="modal-overlay" id="fileModal"><div class="modal"><div class="modal-header"><h3 class="modal-title">ファイルアップロード</h3><button class="modal-close" onclick="closeModal('fileModal')">✕</button></div><div class="modal-body"><div class="form-group"><label class="form-label">ファイル名</label><input type="text" class="form-input" placeholder="表示名を入力"></div><div class="form-group"><label class="form-label">対象プラン</label><select class="form-input form-select"><option>全プラン</option><option>プレミアム</option><option>ベーシック</option></select></div><div class="form-group"><label class="form-label">ファイル</label><input type="file" class="form-input"></div></div><div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('fileModal')">キャンセル</button><button class="btn btn-primary" onclick="saveData('fileModal')">アップロード</button></div></div></div>
+  <div class="toast" id="toast"><span id="toastMessage"></span></div>
+  <script>
+    function toggleSidebar(){document.getElementById('sidebar').classList.toggle('active');document.getElementById('sidebarOverlay').classList.toggle('active')}
+    function showSection(s,e){document.querySelectorAll('.page-section').forEach(p=>p.style.display='none');document.getElementById(s+'Section').style.display='block';document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));if(e)e.classList.add('active');var t={dashboard:'ダッシュボード',users:'会員一覧',orders:'申込管理',files:'資料アップロード',inquiries:'問い合わせ'};document.getElementById('breadcrumbCurrent').textContent=t[s];if(window.innerWidth<=1024)toggleSidebar()}
+    function openModal(i){document.getElementById(i).classList.add('active')}
+    function closeModal(i){document.getElementById(i).classList.remove('active')}
+    function saveData(m){closeModal(m);showToast('保存しました','success')}
+    function logout(){showToast('ログアウトしました','success');setTimeout(()=>window.location.href='flowgram-login.html',1000)}
+    function showToast(m,t){var toast=document.getElementById('toast');document.getElementById('toastMessage').textContent=m;toast.className='toast '+t+' show';setTimeout(()=>toast.classList.remove('show'),3000)}
+    document.querySelectorAll('.modal-overlay').forEach(o=>o.addEventListener('click',function(e){if(e.target===this)closeModal(this.id)}));
+    document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',function(){this.parentElement.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));this.classList.add('active')}));
+  </script>
+</body>
+</html>

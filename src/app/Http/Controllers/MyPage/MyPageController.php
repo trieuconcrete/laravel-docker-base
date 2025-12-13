@@ -8,6 +8,7 @@ use App\Models\Download;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 class MyPageController extends Controller
 {
@@ -132,9 +133,15 @@ class MyPageController extends Controller
             abort(403, 'このファイルにアクセスする権限がありません');
         }
         
+        // Check if file exists using Storage facade
+        if (!Storage::disk('local')->exists($download->file_path)) {
+            return back()->with('error', 'ファイルが見つかりません。管理者にお問い合わせください。');
+        }
+        
         $download->incrementDownloads();
         
-        return response()->download(storage_path('app/' . $download->file_path), $download->file_name);
+        $filePath = Storage::disk('local')->path($download->file_path);
+        return response()->download($filePath, $download->file_name);
     }
 
     /**
