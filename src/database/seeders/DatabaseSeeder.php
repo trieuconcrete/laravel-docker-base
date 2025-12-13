@@ -15,6 +15,8 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        // Note: UserSeeder includes Plans seeding via migration
+        // Run migrations first: php artisan migrate:fresh --seed
         $this->call([
             UserSeeder::class,
         ]);

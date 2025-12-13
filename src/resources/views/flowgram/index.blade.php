@@ -1,0 +1,1757 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <title>FLOWGRAM | SNS運用相談サービス</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400&family=Noto+Sans+JP:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --peach-glow: #FFD5D9;
+      --blush-pink: #F8E7EF;
+      --lavender-haze: #EEE7FF;
+      --soft-mist: #F5F4F6;
+      --white: #FFFFFF;
+      --coral-rose: #FF8CA5;
+      --coral-rose-hover: #FF7A96;
+      --text-primary: #2F2F2F;
+      --text-secondary: #666666;
+      --text-light: #888888;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-xl: 24px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Noto Sans JP', sans-serif;
+      font-weight: 400;
+      color: var(--text-primary);
+      line-height: 1.8;
+      background: var(--white);
+      overflow-x: hidden;
+    }
+
+    /* Typography */
+    h1, h2, h3, h4, h5, h6 {
+      font-weight: 300;
+      line-height: 1.4;
+    }
+
+    .font-en {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 300;
+    }
+
+    /* Layout */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    section {
+      padding: 100px 0;
+    }
+
+    /* Header */
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255, 213, 217, 0.3);
+      transition: all 0.3s ease;
+    }
+
+    .header-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 24px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .logo {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 400;
+      font-size: 24px;
+      letter-spacing: 2px;
+      color: var(--text-primary);
+      text-decoration: none;
+    }
+
+    .logo span {
+      color: var(--coral-rose);
+    }
+
+    nav {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+    }
+
+    nav a {
+      font-size: 14px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: color 0.3s ease;
+      letter-spacing: 0.5px;
+    }
+
+    nav a:hover {
+      color: var(--coral-rose);
+    }
+
+    .nav-cta {
+      background: var(--coral-rose);
+      color: var(--white) !important;
+      padding: 10px 24px;
+      border-radius: 50px;
+      font-size: 13px;
+      transition: all 0.3s ease;
+    }
+
+    .nav-cta:hover {
+      background: var(--coral-rose-hover);
+      transform: translateY(-2px);
+    }
+
+    .mobile-menu-btn {
+      display: none;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 8px;
+    }
+
+    .mobile-menu-btn span {
+      display: block;
+      width: 24px;
+      height: 2px;
+      background: var(--text-primary);
+      margin: 5px 0;
+      transition: all 0.3s ease;
+    }
+
+    /* Hero Section */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(135deg, var(--white) 0%, var(--blush-pink) 50%, var(--lavender-haze) 100%);
+      padding-top: 80px;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -30%;
+      width: 80%;
+      height: 150%;
+      background: radial-gradient(ellipse, rgba(255, 213, 217, 0.4) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero::after {
+      content: '';
+      position: absolute;
+      bottom: -30%;
+      left: -20%;
+      width: 60%;
+      height: 100%;
+      background: radial-gradient(ellipse, rgba(238, 231, 255, 0.5) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-inner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      align-items: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-content {
+      animation: fadeInUp 1s ease;
+    }
+
+    .hero-tag {
+      display: inline-block;
+      background: rgba(255, 140, 165, 0.1);
+      color: var(--coral-rose);
+      padding: 8px 20px;
+      border-radius: 50px;
+      font-size: 13px;
+      margin-bottom: 24px;
+      letter-spacing: 1px;
+    }
+
+    .hero h1 {
+      font-size: clamp(28px, 4vw, 42px);
+      margin-bottom: 24px;
+      letter-spacing: -0.5px;
+    }
+
+    .hero h1 span {
+      color: var(--coral-rose);
+    }
+
+    .hero-lead {
+      font-size: 16px;
+      color: var(--text-secondary);
+      margin-bottom: 32px;
+      line-height: 2;
+    }
+
+    .hero-features {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 40px;
+    }
+
+    .hero-feature {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .hero-feature::before {
+      content: '';
+      width: 20px;
+      height: 20px;
+      background: var(--coral-rose);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z'/%3E%3C/svg%3E");
+      background-size: 12px;
+      background-repeat: no-repeat;
+      background-position: center;
+      flex-shrink: 0;
+    }
+
+    .hero-image {
+      position: relative;
+      animation: fadeIn 1.2s ease;
+    }
+
+    .hero-image img {
+      width: 100%;
+      height: auto;
+      border-radius: var(--radius-xl);
+      object-fit: cover;
+    }
+
+    .hero-image::before {
+      content: '';
+      position: absolute;
+      top: -20px;
+      right: -20px;
+      width: 100%;
+      height: 100%;
+      border: 2px solid var(--peach-glow);
+      border-radius: var(--radius-xl);
+      z-index: -1;
+    }
+
+    .hero-image-placeholder {
+      width: 100%;
+      aspect-ratio: 3/4;
+      background: linear-gradient(135deg, var(--peach-glow) 0%, var(--lavender-haze) 100%);
+      border-radius: var(--radius-xl);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-light);
+      font-size: 14px;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 16px 40px;
+      border-radius: 50px;
+      font-size: 15px;
+      font-weight: 400;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      border: none;
+    }
+
+    .btn-primary {
+      background: var(--coral-rose);
+      color: var(--white);
+      box-shadow: 0 8px 30px rgba(255, 140, 165, 0.3);
+    }
+
+    .btn-primary:hover {
+      background: var(--coral-rose-hover);
+      transform: translateY(-3px);
+      box-shadow: 0 12px 40px rgba(255, 140, 165, 0.4);
+    }
+
+    .btn-secondary {
+      background: var(--white);
+      color: var(--text-primary);
+      border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-secondary:hover {
+      background: var(--soft-mist);
+      transform: translateY(-2px);
+    }
+
+    /* Section Titles */
+    .section-header {
+      text-align: center;
+      margin-bottom: 60px;
+    }
+
+    .section-tag {
+      display: inline-block;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 12px;
+      letter-spacing: 3px;
+      color: var(--coral-rose);
+      margin-bottom: 16px;
+      text-transform: uppercase;
+    }
+
+    .section-title {
+      font-size: clamp(24px, 3vw, 32px);
+      margin-bottom: 16px;
+    }
+
+    .section-subtitle {
+      font-size: 15px;
+      color: var(--text-secondary);
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    /* Pain Points Section */
+    .pain-points {
+      background: linear-gradient(180deg, var(--white) 0%, var(--soft-mist) 100%);
+    }
+
+    .pain-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+
+    .pain-card {
+      background: var(--white);
+      padding: 32px;
+      border-radius: var(--radius-lg);
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+
+    .pain-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.05);
+    }
+
+    .pain-icon {
+      width: 60px;
+      height: 60px;
+      background: linear-gradient(135deg, var(--peach-glow) 0%, var(--lavender-haze) 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+      font-size: 24px;
+    }
+
+    .pain-card p {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+
+    /* Reasons Section */
+    .reasons {
+      background: var(--white);
+    }
+
+    .reason-cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 32px;
+    }
+
+    .reason-card {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      padding: 40px 32px;
+      text-align: center;
+      border: 1px solid rgba(255, 213, 217, 0.5);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .reason-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--peach-glow) 0%, var(--coral-rose) 50%, var(--lavender-haze) 100%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .reason-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 30px 60px rgba(255, 140, 165, 0.1);
+    }
+
+    .reason-card:hover::before {
+      opacity: 1;
+    }
+
+    .reason-number {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 48px;
+      font-weight: 300;
+      color: var(--peach-glow);
+      margin-bottom: 16px;
+    }
+
+    .reason-card h3 {
+      font-size: 18px;
+      margin-bottom: 16px;
+      line-height: 1.6;
+    }
+
+    .reason-card p {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.9;
+    }
+
+    /* Testimonials */
+    .testimonials {
+      background: linear-gradient(135deg, var(--blush-pink) 0%, var(--lavender-haze) 100%);
+    }
+
+    .testimonial-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+
+    .testimonial-card {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      padding: 32px;
+      position: relative;
+    }
+
+    .testimonial-card::before {
+      content: '"';
+      position: absolute;
+      top: 16px;
+      left: 24px;
+      font-size: 60px;
+      font-family: Georgia, serif;
+      color: var(--peach-glow);
+      line-height: 1;
+    }
+
+    .testimonial-content {
+      margin-bottom: 24px;
+      padding-top: 24px;
+    }
+
+    .testimonial-content p {
+      font-size: 14px;
+      line-height: 1.9;
+      color: var(--text-secondary);
+    }
+
+    .testimonial-author {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding-top: 20px;
+      border-top: 1px solid var(--soft-mist);
+    }
+
+    .testimonial-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--peach-glow) 0%, var(--lavender-haze) 100%);
+    }
+
+    .testimonial-info {
+      font-size: 13px;
+    }
+
+    .testimonial-name {
+      color: var(--text-primary);
+      margin-bottom: 2px;
+    }
+
+    .testimonial-role {
+      color: var(--text-light);
+      font-size: 12px;
+    }
+
+    /* Services Section */
+    .services {
+      background: var(--white);
+    }
+
+    .service-categories {
+      display: flex;
+      flex-direction: column;
+      gap: 60px;
+    }
+
+    .service-category {
+      background: linear-gradient(135deg, rgba(255, 213, 217, 0.1) 0%, rgba(238, 231, 255, 0.1) 100%);
+      border-radius: var(--radius-xl);
+      padding: 48px;
+    }
+
+    .service-category-title {
+      font-size: 20px;
+      margin-bottom: 32px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .service-category-title::before {
+      content: '';
+      width: 4px;
+      height: 24px;
+      background: var(--coral-rose);
+      border-radius: 2px;
+    }
+
+    .service-list {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+    }
+
+    .service-item {
+      background: var(--white);
+      padding: 28px;
+      border-radius: var(--radius-md);
+      display: flex;
+      gap: 16px;
+      transition: all 0.3s ease;
+    }
+
+    .service-item:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.05);
+    }
+
+    .service-icon {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, var(--peach-glow) 0%, var(--lavender-haze) 100%);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 20px;
+    }
+
+    .service-info h4 {
+      font-size: 15px;
+      font-weight: 400;
+      margin-bottom: 8px;
+    }
+
+    .service-info p {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.7;
+    }
+
+    .service-price {
+      display: inline-block;
+      background: rgba(255, 140, 165, 0.1);
+      color: var(--coral-rose);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 13px;
+      margin-top: 12px;
+    }
+
+    /* Video Editing Section */
+    .video-packages {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      margin-top: 32px;
+    }
+
+    .video-package {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      padding: 32px;
+      text-align: center;
+      border: 2px solid transparent;
+      transition: all 0.3s ease;
+    }
+
+    .video-package:hover {
+      border-color: var(--coral-rose);
+      transform: translateY(-5px);
+    }
+
+    .video-package.featured {
+      border-color: var(--coral-rose);
+      position: relative;
+    }
+
+    .video-package.featured::before {
+      content: 'おすすめ';
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--coral-rose);
+      color: var(--white);
+      padding: 4px 16px;
+      border-radius: 20px;
+      font-size: 12px;
+    }
+
+    .video-package h4 {
+      font-size: 16px;
+      margin-bottom: 8px;
+    }
+
+    .video-package .price {
+      font-size: 32px;
+      font-weight: 300;
+      color: var(--coral-rose);
+      margin-bottom: 8px;
+    }
+
+    .video-package .price span {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .video-package .per-video {
+      font-size: 13px;
+      color: var(--text-light);
+      margin-bottom: 16px;
+    }
+
+    .video-package p {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    /* Steps Section */
+    .steps {
+      background: linear-gradient(180deg, var(--soft-mist) 0%, var(--white) 100%);
+    }
+
+    .steps-container {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      position: relative;
+    }
+
+    .steps-container::before {
+      content: '';
+      position: absolute;
+      left: 32px;
+      top: 40px;
+      bottom: 40px;
+      width: 2px;
+      background: linear-gradient(180deg, var(--peach-glow) 0%, var(--lavender-haze) 100%);
+    }
+
+    .step-item {
+      display: flex;
+      gap: 32px;
+      padding: 32px 0;
+      position: relative;
+    }
+
+    .step-number {
+      width: 64px;
+      height: 64px;
+      background: var(--white);
+      border: 2px solid var(--peach-glow);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 20px;
+      color: var(--coral-rose);
+      flex-shrink: 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    .step-content {
+      flex: 1;
+      padding-top: 12px;
+    }
+
+    .step-content h4 {
+      font-size: 18px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .step-badge {
+      background: rgba(255, 140, 165, 0.1);
+      color: var(--coral-rose);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+    }
+
+    .step-content p {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+
+    /* Pricing Section */
+    .pricing {
+      background: var(--white);
+    }
+
+    .pricing-cards {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 32px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .pricing-card {
+      background: var(--white);
+      border-radius: var(--radius-xl);
+      padding: 48px 40px;
+      border: 1px solid rgba(255, 213, 217, 0.5);
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .pricing-card.featured {
+      border: 2px solid var(--coral-rose);
+      box-shadow: 0 30px 60px rgba(255, 140, 165, 0.15);
+    }
+
+    .pricing-card.featured::before {
+      content: '人気';
+      position: absolute;
+      top: -14px;
+      right: 32px;
+      background: var(--coral-rose);
+      color: var(--white);
+      padding: 6px 20px;
+      border-radius: 20px;
+      font-size: 13px;
+    }
+
+    .pricing-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 30px 60px rgba(255, 140, 165, 0.15);
+    }
+
+    .pricing-name {
+      font-size: 14px;
+      color: var(--text-light);
+      margin-bottom: 8px;
+      letter-spacing: 1px;
+    }
+
+    .pricing-price {
+      font-size: 48px;
+      font-weight: 300;
+      margin-bottom: 8px;
+    }
+
+    .pricing-price span {
+      font-size: 16px;
+      color: var(--text-secondary);
+    }
+
+    .pricing-period {
+      font-size: 13px;
+      color: var(--text-light);
+      margin-bottom: 32px;
+    }
+
+    .pricing-features {
+      list-style: none;
+      margin-bottom: 32px;
+    }
+
+    .pricing-features li {
+      padding: 12px 0;
+      font-size: 14px;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid var(--soft-mist);
+    }
+
+    .pricing-features li:last-child {
+      border-bottom: none;
+    }
+
+    .pricing-features li::before {
+      content: '✓';
+      color: var(--coral-rose);
+      font-weight: 500;
+    }
+
+    .pricing-card .btn {
+      width: 100%;
+    }
+
+    /* Options Grid */
+    .options-section {
+      margin-top: 60px;
+    }
+
+    .options-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+      margin-top: 32px;
+    }
+
+    .option-card {
+      background: var(--soft-mist);
+      padding: 24px;
+      border-radius: var(--radius-md);
+      text-align: center;
+    }
+
+    .option-card h4 {
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+
+    .option-card .price {
+      color: var(--coral-rose);
+      font-size: 18px;
+      font-weight: 400;
+    }
+
+    /* CTA Section */
+    .cta {
+      background: linear-gradient(135deg, var(--blush-pink) 0%, var(--lavender-haze) 100%);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cta::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, transparent 60%);
+      animation: pulse 4s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 0.5; }
+      50% { transform: scale(1.1); opacity: 0.3; }
+    }
+
+    .cta-content {
+      position: relative;
+      z-index: 1;
+    }
+
+    .cta h2 {
+      font-size: clamp(28px, 4vw, 40px);
+      margin-bottom: 24px;
+    }
+
+    .cta p {
+      font-size: 16px;
+      color: var(--text-secondary);
+      margin-bottom: 40px;
+      max-width: 500px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .cta .btn-primary {
+      padding: 20px 60px;
+      font-size: 16px;
+    }
+
+    /* Company Section */
+    .company {
+      background: var(--white);
+      padding: 80px 0;
+    }
+
+    .company-info {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .company-table {
+      width: 100%;
+    }
+
+    .company-table tr {
+      border-bottom: 1px solid var(--soft-mist);
+    }
+
+    .company-table th,
+    .company-table td {
+      padding: 20px 0;
+      font-size: 14px;
+      text-align: left;
+    }
+
+    .company-table th {
+      width: 140px;
+      color: var(--text-light);
+      font-weight: 400;
+    }
+
+    /* Footer */
+    footer {
+      background: var(--text-primary);
+      color: var(--white);
+      padding: 60px 0 30px;
+    }
+
+    .footer-content {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 60px;
+      margin-bottom: 60px;
+    }
+
+    .footer-brand {
+      max-width: 300px;
+    }
+
+    .footer-logo {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 400;
+      font-size: 24px;
+      letter-spacing: 2px;
+      margin-bottom: 16px;
+    }
+
+    .footer-logo span {
+      color: var(--coral-rose);
+    }
+
+    .footer-brand p {
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.6);
+      line-height: 1.8;
+    }
+
+    .footer-links h5 {
+      font-size: 13px;
+      font-weight: 400;
+      margin-bottom: 20px;
+      color: rgba(255, 255, 255, 0.4);
+      letter-spacing: 1px;
+    }
+
+    .footer-links ul {
+      list-style: none;
+    }
+
+    .footer-links li {
+      margin-bottom: 12px;
+    }
+
+    .footer-links a {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+
+    .footer-links a:hover {
+      color: var(--coral-rose);
+    }
+
+    .footer-social {
+      display: flex;
+      gap: 16px;
+      margin-top: 24px;
+    }
+
+    .footer-social a {
+      width: 40px;
+      height: 40px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      transition: all 0.3s ease;
+      font-size: 14px;
+    }
+
+    .footer-social a:hover {
+      background: var(--coral-rose);
+      border-color: var(--coral-rose);
+    }
+
+    .footer-bottom {
+      padding-top: 30px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .footer-bottom p {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.4);
+    }
+
+    /* Animations */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .fade-in {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.6s ease;
+    }
+
+    .fade-in.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .hero-inner {
+        grid-template-columns: 1fr;
+        text-align: center;
+      }
+
+      .hero-image {
+        max-width: 500px;
+        margin: 0 auto;
+      }
+
+      .hero-features {
+        align-items: center;
+      }
+
+      .pain-grid,
+      .reason-cards,
+      .testimonial-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .service-list {
+        grid-template-columns: 1fr;
+      }
+
+      .video-packages {
+        grid-template-columns: 1fr;
+        max-width: 400px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      .options-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .footer-content {
+        grid-template-columns: 1fr 1fr;
+        gap: 40px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      section {
+        padding: 60px 0;
+      }
+
+      nav {
+        display: none;
+      }
+
+      .mobile-menu-btn {
+        display: block;
+      }
+
+      .pain-grid,
+      .reason-cards,
+      .testimonial-grid,
+      .pricing-cards {
+        grid-template-columns: 1fr;
+      }
+
+      .steps-container::before {
+        left: 24px;
+      }
+
+      .step-number {
+        width: 48px;
+        height: 48px;
+        font-size: 16px;
+      }
+
+      .options-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .footer-content {
+        grid-template-columns: 1fr;
+        gap: 32px;
+        text-align: center;
+      }
+
+      .footer-brand {
+        max-width: 100%;
+      }
+
+      .footer-social {
+        justify-content: center;
+      }
+
+      .footer-bottom {
+        flex-direction: column;
+        gap: 16px;
+        text-align: center;
+      }
+    }
+
+    /* Mobile Menu */
+    .mobile-nav {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: var(--white);
+      z-index: 999;
+      padding: 100px 24px;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .mobile-nav.active {
+      display: flex;
+    }
+
+    .mobile-nav a {
+      font-size: 18px;
+      color: var(--text-primary);
+      text-decoration: none;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--soft-mist);
+    }
+
+    .mobile-nav .btn-primary {
+      margin-top: 24px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="header-inner">
+      <a href="{{ url('/') }}" class="logo">FLOW<span>GRAM</span></a>
+      <nav>
+        <a href="#services">サービス内容</a>
+        <a href="#pricing">料金プラン</a>
+        <a href="#flow">ご利用の流れ</a>
+        <a href="#company">会社概要</a>
+        @auth
+          <a href="{{ url('/mypage') }}" class="nav-cta">マイページ</a>
+        @else
+          <a href="{{ url('/login') }}" class="nav-cta">無料相談</a>
+        @endauth
+      </nav>
+      <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Mobile Navigation -->
+  <div class="mobile-nav" id="mobileNav">
+    <a href="#services" onclick="toggleMobileMenu()">サービス内容</a>
+    <a href="#pricing" onclick="toggleMobileMenu()">料金プラン</a>
+    <a href="#flow" onclick="toggleMobileMenu()">ご利用の流れ</a>
+    <a href="#company" onclick="toggleMobileMenu()">会社概要</a>
+    @auth
+      <a href="{{ url('/mypage') }}" class="btn btn-primary" onclick="toggleMobileMenu()">マイページ</a>
+    @else
+      <a href="{{ url('/login') }}" class="btn btn-primary" onclick="toggleMobileMenu()">無料相談</a>
+    @endauth
+  </div>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero-inner">
+        <div class="hero-content">
+          <span class="hero-tag font-en">SNS Support Service</span>
+          <h1>SNSの悩み、いつでも<br><span>"相談できる"</span>味方を。</h1>
+          <p class="hero-lead">
+            SNSの悩みを、毎日のチャットでスッと軽く。<br>
+            平日10:00〜17:00なら、いつでも相談できる<br>
+            <strong>チャット型のSNS運用サポートサービス</strong>です。<br><br>
+            フォロワー1万人達成経験を持つスタッフが、<br>
+            あなたの強みを言語化し、方向性を整えながら<br>
+            <strong>ムリのない"運用改善"と"成果づくり"を伴走します。</strong>
+          </p>
+          <div class="hero-features">
+            <div class="hero-feature">SNS運用のプロに"無制限チャット相談"</div>
+            <div class="hero-feature">最新アルゴリズムを常に研究・共有</div>
+            <div class="hero-feature">写真・動画の添削から企画まで丁寧にサポート</div>
+            <div class="hero-feature">コストを抑えながら「ちゃんと結果が出る運用」を</div>
+          </div>
+          <a href="{{ url('/register') }}" class="btn btn-primary">LINEで無料相談する</a>
+        </div>
+        <div class="hero-image">
+          <div class="hero-image-placeholder">
+            Hero Image<br>K-beauty風ポートレート
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pain Points Section -->
+  <section class="pain-points">
+    <div class="container">
+      <div class="section-header fade-in">
+        <span class="section-tag">Problem</span>
+        <h2 class="section-title">「SNS、ひとりで頑張っても伸びない。」</h2>
+        <p class="section-subtitle">こんなお悩み、ありませんか？</p>
+      </div>
+      <div class="pain-grid">
+        <div class="pain-card fade-in">
+          <div class="pain-icon">📱</div>
+          <p>投稿してもフォロワーが増えない</p>
+        </div>
+        <div class="pain-card fade-in">
+          <div class="pain-icon">📸</div>
+          <p>写真や動画をアップしても反応が弱い</p>
+        </div>
+        <div class="pain-card fade-in">
+          <div class="pain-icon">❓</div>
+          <p>何が正解か分からず、更新が止まる</p>
+        </div>
+        <div class="pain-card fade-in">
+          <div class="pain-icon">🏢</div>
+          <p>企業アカウントを任されたが、成果につながらない</p>
+        </div>
+        <div class="pain-card fade-in">
+          <div class="pain-icon">💰</div>
+          <p>広告代理店を使う予算がない</p>
+        </div>
+        <div class="pain-card fade-in">
+          <div class="pain-icon">🧭</div>
+          <p>方向性に自信がなく、改善点が自分で判断できない</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Reasons Section -->
+  <section class="reasons">
+    <div class="container">
+      <div class="section-header fade-in">
+        <span class="section-tag">Why FLOWGRAM</span>
+        <h2 class="section-title">FLOWGRAMが選ばれる理由</h2>
+      </div>
+      <div class="reason-cards">
+        <div class="reason-card fade-in">
+          <div class="reason-number font-en">01</div>
+          <h3>全員"1万フォロワー達成"の<br>実績者だけ</h3>
+          <p>SNSの伸ばし方・アルゴリズム・企画・導線設計など、実際に伸ばした人だけがアドバイスします。写真の撮り方、リールの改善、企画構成、世界観設計まですべて実務ベースで指導。</p>
+        </div>
+        <div class="reason-card fade-in">
+          <div class="reason-number font-en">02</div>
+          <h3>平日いつでも<br>"無制限で相談できる"安心感</h3>
+          <p>10:00〜17:00の間、何回質問してもOK。「これ投稿していい？」「この写真どっちがいい？」など、すぐに返事がもらえる環境で日々の運用をサポートします。</p>
+        </div>
+        <div class="reason-card fade-in">
+          <div class="reason-number font-en">03</div>
+          <h3>広告代理店より<br>圧倒的にコスパが良い</h3>
+          <p>広告代理店の月額10〜30万円ではなく、月1,980円〜。必要に応じて「添削」「個別カウンセリング」「動画編集」だけ追加できる"無駄のない"料金体系。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonials Section -->
+  <section class="testimonials">
+    <div class="container">
+      <div class="section-header fade-in">
+        <span class="section-tag">Voice</span>
+        <h2 class="section-title">使ってる人の"ほんとの話"。</h2>
+      </div>
+      <div class="testimonial-grid">
+        <div class="testimonial-card fade-in">
+          <div class="testimonial-content">
+            <p>投稿の"何が悪いか"まで教えてくれるの助かりすぎた😭 毎回ちょっとずつ伸びてて楽しい。</p>
+          </div>
+          <div class="testimonial-author">
+            <div class="testimonial-avatar"></div>
+            <div class="testimonial-info">
+              <div class="testimonial-name">@miyu_insta</div>
+              <div class="testimonial-role">20代 女性</div>
+            </div>
+          </div>
+        </div>
+        <div class="testimonial-card fade-in">
+          <div class="testimonial-content">
+            <p>サロンのアカウント、正直もう詰んだと思ってたけど"こっちが伸びるよ"のアドバイスが的確すぎた…！</p>
+          </div>
+          <div class="testimonial-author">
+            <div class="testimonial-avatar"></div>
+            <div class="testimonial-info">
+              <div class="testimonial-name">@hana_salon</div>
+              <div class="testimonial-role">女性経営者</div>
+            </div>
+          </div>
+        </div>
+        <div class="testimonial-card fade-in">
+          <div class="testimonial-content">
+            <p>社内にSNSわかる人いないので、本当に助かってます。投稿の指針ができてストレス激減しました。</p>
+          </div>
+          <div class="testimonial-author">
+            <div class="testimonial-avatar"></div>
+            <div class="testimonial-info">
+              <div class="testimonial-name">@kaori_pr</div>
+              <div class="testimonial-role">中小企業広報</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Services Section -->
+  <section class="services" id="services">
+    <div class="container">
+      <div class="section-header fade-in">
+        <span class="section-tag">Services</span>
+        <h2 class="section-title">あなたのSNSを"伸ばすため"の<br>サポート全部入り。</h2>
+        <p class="section-subtitle">SNS相談なしでも動画編集だけ依頼できます</p>
+      </div>
+
+      <div class="service-categories">
+        <!-- Chat Support -->
+        <div class="service-category fade-in">
+          <h3 class="service-category-title">チャットサポート</h3>
+          <div class="service-list">
+            <div class="service-item">
+              <div class="service-icon">💬</div>
+              <div class="service-info">
+                <h4>無制限チャット相談</h4>
+                <p>平日10:00〜17:00。SNS運用の質問・企画相談・投稿の添削など、気軽に聞ける日常サポート。</p>
+                <span class="service-price">ベーシックプランに含む</span>
+              </div>
+            </div>
+            <div class="service-item">
+              <div class="service-icon">⚡</div>
+              <div class="service-info">
+                <h4>優先返信オプション</h4>
+                <p>返信を最優先で受けたい方向け。</p>
+                <span class="service-price">＋500円/月</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Consulting -->
+        <div class="service-category fade-in">
+          <h3 class="service-category-title">添削・カウンセリング</h3>
+          <div class="service-list">
+            <div class="service-item">
+              <div class="service-icon">🎬</div>
+              <div class="service-info">
+                <h4>動画添削</h4>
+                <p>投稿前に動画を送り、構成・テンポ・伝わりやすさの改善ポイントをサクッと提案。</p>
+                <span class="service-price">1回 1,000円</span>
+              </div>
+            </div>
+            <div class="service-item">
+              <div class="service-icon">🎯</div>
+              <div class="service-info">
+                <h4>個別カウンセリング</h4>
+                <p>Google Meetで方向性の整理や深い相談が可能。</p>
+                <span class="service-price">5分 200円</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Video Editing -->
+        <div class="service-category fade-in">
+          <h3 class="service-category-title">🎬 動画編集サービス</h3>
+          <p style="font-size: 14px; color: var(--text-secondary); margin-bottom: 24px;">
+            〜60秒のショート動画。構成・テンポ・テロップまで整える完成品を納品。<br>
+            SNS相談なしで"動画編集だけ"の依頼も可能です。
+          </p>
+          <div class="video-packages">
+            <div class="video-package">
+              <h4>単品</h4>
+              <div class="price">¥5,000<span>/本</span></div>
+              <p>まずは1本から試したい方に</p>
+            </div>
+            <div class="video-package featured">
+              <h4>5本セット</h4>
+              <div class="price">¥22,500</div>
+              <div class="per-video">@4,500円/本</div>
+              <p>少しだけコストを抑えて継続投稿したい人向け</p>
+            </div>
+            <div class="video-package">
+              <h4>10本セット</h4>
+              <div class="price">¥30,000</div>
+              <div class="per-video">@3,000円/本</div>
+              <p>圧倒的コスパ。本気で伸ばしたい月に最適</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Steps Section -->
+  <section class="steps" id="flow">
+    <div class="container">
+      <div class="section-header fade-in">
+        <span class="section-tag">Flow</span>
+        <h2 class="section-title">すぐ使えて、すぐ相談できる。</h2>
+        <p class="section-subtitle">登録から相談開始まで、たった5ステップ。</p>
+      </div>
+      <div class="steps-container">
+        <div class="step-item fade-in">
+          <div class="step-number font-en">1</div>
+          <div class="step-content">
+            <h4>会員登録 <span class="step-badge">無料</span></h4>
+            <p>まずは無料で会員登録。登録が完了すると、あなた専用の「予約管理画面」にログインできます。</p>
+          </div>
+        </div>
+        <div class="step-item fade-in">
+          <div class="step-number font-en">2</div>
+          <div class="step-content">
+            <h4>無料カウンセリングを予約</h4>
+            <p>予約管理画面から、都合の良い日程をワンクリックで予約。初回は無料で安心して相談できます。</p>
+          </div>
+        </div>
+        <div class="step-item fade-in">
+          <div class="step-number font-en">3</div>
+          <div class="step-content">
+            <h4>ヒアリング <span class="step-badge">初回無料</span></h4>
+            <p>あなたの状況・目的・世界観・悩みを丁寧にヒアリング。「伸ばしたい方向性」「アカウントの強み・弱み」を整理します。</p>
+          </div>
+        </div>
+        <div class="step-item fade-in">
+          <div class="step-number font-en">4</div>
+          <div class="step-content">
+            <h4>チャット相談スタート</h4>
+            <p>ヒアリング後は、いつでも無制限チャット相談OK。投稿前のチェック・リールの方向性・企画相談など自由に質問できます。</p>
+          </div>
+        </div>
+        <div class="step-item fade-in">
+          <div class="step-number font-en">5</div>
+          <div class="step-content">
+            <h4>添削 / カウンセリング</h4>
+            <p>動画添削、写真の選び方、世界観の改善、GoogleMeetでの深掘り相談など、必要に合わせて追加で相談できます。</p>
+          </div>
+        </div>
+        <div class="step-item fade-in">
+          <div class="step-number font-en">6</div>
+          <div class="step-content">
+            <h4>運用レポート <span class="step-badge">プレミアムのみ</span></h4>
+            <p>1ヶ月の動きを分析したレポートをお届け。改善ポイント・今後の戦略を一目で確認できます。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing Section -->
+  <section class="pricing" id="pricing">
+    <div class="container">
+      <div class="section-header fade-in">
+        <span class="section-tag">Pricing</span>
+        <h2 class="section-title">必要なものだけ。<br>分かりやすく、始めやすく。</h2>
+      </div>
+      <div class="pricing-cards">
+        <div class="pricing-card fade-in">
+          <div class="pricing-name font-en">BASIC</div>
+          <div class="pricing-price">¥1,980<span>/月〜</span></div>
+          <div class="pricing-period">平日10:00〜17:00対応</div>
+          <ul class="pricing-features">
+            <li>無制限チャット相談</li>
+            <li>投稿の添削・アドバイス</li>
+            <li>企画・方向性相談</li>
+            <li>アルゴリズム情報の共有</li>
+          </ul>
+          <a href="{{ url('/register') }}" class="btn btn-secondary">このプランで始める</a>
+        </div>
+        <div class="pricing-card featured fade-in">
+          <div class="pricing-name font-en">PREMIUM</div>
+          <div class="pricing-price">¥4,980<span>/月〜</span></div>
+          <div class="pricing-period">ベーシック＋レポート付き</div>
+          <ul class="pricing-features">
+            <li>ベーシックプランの全機能</li>
+            <li>月1回の運営レポート</li>
+            <li>データ分析・改善提案</li>
+            <li>戦略立案サポート</li>
+          </ul>
+          <a href="{{ url('/register') }}" class="btn btn-primary">このプランで始める</a>
+        </div>
+      </div>
+
+      <div class="options-section fade-in">
+        <div class="section-header" style="margin-bottom: 24px;">
+          <h3 style="font-size: 20px;">オプション</h3>
+        </div>
+        <div class="options-grid">
+          <div class="option-card">
+            <h4>優先返信</h4>
+            <div class="price">＋500円/月</div>
+          </div>
+          <div class="option-card">
+            <h4>動画添削</h4>
+            <div class="price">1回 1,000円</div>
+          </div>
+          <div class="option-card">
+            <h4>個別カウンセリング</h4>
+            <div class="price">5分 200円</div>
+          </div>
+          <div class="option-card">
+            <h4>単品動画編集</h4>
+            <div class="price">1本 5,000円</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="cta" id="contact">
+    <div class="container">
+      <div class="cta-content fade-in">
+        <h2>今日から、SNSの<br>伸び方が変わる。</h2>
+        <p>まずは無料カウンセリングから。<br>あなたのSNS運用の悩み、お聞かせください。</p>
+        <a href="{{ url('/register') }}" class="btn btn-primary">LINEで無料相談する</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Company Section -->
+  <section class="company" id="company">
+    <div class="container">
+      <div class="section-header fade-in">
+        <span class="section-tag">Company</span>
+        <h2 class="section-title">会社概要</h2>
+      </div>
+      <div class="company-info fade-in">
+        <table class="company-table">
+          <tr>
+            <th>会社名</th>
+            <td>株式会社FLOWGRAM</td>
+          </tr>
+          <tr>
+            <th>代表者</th>
+            <td>—</td>
+          </tr>
+          <tr>
+            <th>所在地</th>
+            <td>—</td>
+          </tr>
+          <tr>
+            <th>事業内容</th>
+            <td>SNSコンサルティング ほか</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-brand">
+          <div class="footer-logo">FLOW<span>GRAM</span></div>
+          <p>フォロワー1万人達成者だけのプロチームが、あなたの強みを活かした"選ばれる発信"を毎日サポートします。</p>
+          <div class="footer-social">
+            <a href="#" aria-label="Instagram">IG</a>
+            <a href="#" aria-label="X">X</a>
+            <a href="#" aria-label="TikTok">TT</a>
+          </div>
+        </div>
+        <div class="footer-links">
+          <h5>SERVICE</h5>
+          <ul>
+            <li><a href="#services">サービス内容</a></li>
+            <li><a href="#pricing">料金プラン</a></li>
+            <li><a href="#flow">ご利用の流れ</a></li>
+          </ul>
+        </div>
+        <div class="footer-links">
+          <h5>COMPANY</h5>
+          <ul>
+            <li><a href="#company">会社概要</a></li>
+            <li><a href="{{ url('/contact') }}">お問い合わせ</a></li>
+          </ul>
+        </div>
+        <div class="footer-links">
+          <h5>LEGAL</h5>
+          <ul>
+            <li><a href="{{ url('/legal/tokushoho') }}">特定商取引法に基づく表記</a></li>
+            <li><a href="{{ url('/legal/privacy') }}">プライバシーポリシー</a></li>
+            <li><a href="{{ url('/legal/terms') }}">利用規約</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; {{ date('Y') }} FLOWGRAM. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Mobile Menu Toggle
+    function toggleMobileMenu() {
+      const nav = document.getElementById('mobileNav');
+      nav.classList.toggle('active');
+    }
+
+    // Scroll Animation
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, observerOptions);
+
+    document.querySelectorAll('.fade-in').forEach(el => {
+      observer.observe(el);
+    });
+
+    // Header Scroll Effect
+    let lastScroll = 0;
+    window.addEventListener('scroll', () => {
+      const header = document.querySelector('header');
+      const currentScroll = window.pageYOffset;
+      
+      if (currentScroll > 100) {
+        header.style.boxShadow = '0 2px 20px rgba(0, 0, 0, 0.05)';
+      } else {
+        header.style.boxShadow = 'none';
+      }
+      
+      lastScroll = currentScroll;
+    });
+
+    // Smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function(e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+          });
+        }
+      });
+    });
+  </script>
+
+</body>
+</html>
+

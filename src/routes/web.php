@@ -3,7 +3,15 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\MyPage\MyPageController;
+
+// Admin Controllers
+use App\Http\Controllers\Flowgram\Admin\DashboardController;
+use App\Http\Controllers\Flowgram\Admin\UserController;
+use App\Http\Controllers\Flowgram\Admin\OrderController;
+use App\Http\Controllers\Flowgram\Admin\SubscriptionController;
+use App\Http\Controllers\Flowgram\Admin\DownloadController;
+use App\Http\Controllers\Flowgram\Admin\ContactInquiryController;
 
 /*
 |--------------------------------------------------------------------------
@@ -11,16 +19,61 @@ use App\Http\Controllers\Admin\DashboardController;
 |--------------------------------------------------------------------------
 */
 
-// Public Routes
+// ==============================================
+// Public Routes - FLOWGRAM
+// ==============================================
+
 Route::get('/', function () {
-    return view('welcome');
+    return view('flowgram.index');
 });
 
+// Legal Pages
+Route::prefix('legal')->group(function () {
+    Route::get('/tokushoho', fn() => view('flowgram.legal.tokushoho'))->name('legal.tokushoho');
+    Route::get('/privacy', fn() => view('flowgram.legal.privacy'))->name('legal.privacy');
+    Route::get('/terms', fn() => view('flowgram.legal.terms'))->name('legal.terms');
+});
+
+// Contact Page (Public)
+Route::get('/contact', fn() => view('flowgram.contact'))->name('contact');
+
+Route::post('/contact', function (\Illuminate\Http\Request $request) {
+    $user = Auth::user();
+    
+    $validated = $request->validate([
+        'topics' => ['required', 'array'],
+        'name' => $user ? ['nullable'] : ['required', 'string', 'max:255'],
+        'email' => $user ? ['nullable'] : ['required', 'email', 'max:255'],
+        'phone' => ['nullable', 'string', 'max:20'],
+        'subject' => ['required', 'string', 'max:255'],
+        'message' => ['required', 'string'],
+    ]);
+    
+    \App\Models\ContactInquiry::create([
+        'user_id' => $user?->id,
+        'topics' => $validated['topics'],
+        'name' => $validated['name'] ?? $user?->name ?? 'Guest',
+        'email' => $validated['email'] ?? $user?->email ?? '',
+        'phone' => $validated['phone'] ?? $user?->phone,
+        'subject' => $validated['subject'],
+        'message' => $validated['message'],
+        'status' => 'new',
+    ]);
+    
+    if ($request->ajax() || $request->wantsJson()) {
+        return response()->json(['message' => 'お問い合わせを送信しました']);
+    }
+    
+    return redirect()->back()->with('success', 'お問い合わせを受け付けました。担当者より折り返しご連絡いたします。');
+})->name('contact.submit');
+
+// ==============================================
 // Guest Routes (Login/Register)
+// ==============================================
+
 Route::middleware('guest')->group(function () {
-    Route::get('/login', function () {
-        return view('auth.login');
-    })->name('login');
+    Route::get('/login', fn() => view('flowgram.login'))->name('login');
+    Route::get('/register', fn() => view('flowgram.register'))->name('register.form');
     
     Route::post('/login', function (\Illuminate\Http\Request $request) {
         $credentials = $request->validate([
@@ -30,11 +83,17 @@ Route::middleware('guest')->group(function () {
 
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
-            return redirect()->intended(route('admin.dashboard'));
+            
+            // Redirect based on role
+            $user = Auth::user();
+            if ($user->role === 'admin') {
+                return redirect()->intended(route('admin.dashboard'));
+            }
+            return redirect()->intended(route('mypage'));
         }
 
         return back()->withErrors([
-            'email' => 'The provided credentials do not match our records.',
+            'email' => 'メールアドレスまたはパスワードが正しくありません。',
         ])->onlyInput('email');
     });
     
@@ -47,6 +106,7 @@ Route::middleware('guest')->group(function () {
         ]);
 
         $user = \App\Models\User::create([
+            'role' => 'user',
             'name' => $validated['name'],
             'email' => $validated['email'],
             'phone' => $validated['phone'] ?? null,
@@ -55,16 +115,19 @@ Route::middleware('guest')->group(function () {
 
         Auth::login($user);
 
-        return redirect()->route('admin.dashboard')->with('success', 'Đăng ký thành công!');
+        return redirect()->route('mypage')->with('success', '登録が完了しました！');
     })->name('register');
 });
 
-// Password Reset Routes
-Route::get('/forgot-password', function () {
-    return view('auth.forgot-password');
-})->middleware('guest')->name('password.request');
+// Password Reset
+Route::get('/forgot-password', fn() => view('auth.forgot-password'))
+    ->middleware('guest')
+    ->name('password.request');
 
+// ==============================================
 // Authenticated Routes
+// ==============================================
+
 Route::middleware(['auth'])->group(function () {
     
     // Logout
@@ -74,152 +137,78 @@ Route::middleware(['auth'])->group(function () {
         $request->session()->regenerateToken();
         return redirect('/login');
     })->name('logout');
-    
-    // Admin Routes
-    Route::prefix('admin')->name('admin.')->group(function () {
+
+    // ==============================================
+    // MyPage Routes (User only)
+    // ==============================================
+    Route::prefix('mypage')->name('mypage')->middleware('user')->group(function () {
+        Route::get('/', [MyPageController::class, 'index']);
+        Route::get('/orders', [MyPageController::class, 'orders'])->name('.orders');
+        Route::get('/downloads', [MyPageController::class, 'downloads'])->name('.downloads');
+        Route::get('/downloads/{download}/file', [MyPageController::class, 'download'])->name('.download');
+        Route::get('/profile', [MyPageController::class, 'profile'])->name('.profile');
+        Route::put('/profile', [MyPageController::class, 'updateProfile'])->name('.profile.update');
+        Route::get('/password', [MyPageController::class, 'showPasswordForm'])->name('.password');
+        Route::put('/password', [MyPageController::class, 'updatePassword'])->name('.password.update');
+        Route::get('/delete-account', [MyPageController::class, 'showDeleteAccountForm'])->name('.delete-account');
+        Route::delete('/delete-account', [MyPageController::class, 'deleteAccount'])->name('.delete-account.submit');
+        Route::get('/billing', [MyPageController::class, 'billing'])->name('.billing');
+        Route::get('/cancel', [MyPageController::class, 'showCancelForm'])->name('.cancel');
+        Route::post('/cancel', [MyPageController::class, 'requestCancellation'])->name('.cancel.submit');
+        Route::get('/support', [MyPageController::class, 'support'])->name('.support');
+        Route::post('/support', [MyPageController::class, 'submitContact'])->name('.contact.submit');
+    });
+
+    // ==============================================
+    // Admin Routes (Admin only)
+    // ==============================================
+    Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {
         
         // Dashboard
-        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+        Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
         
-        // Profile & Settings
-        Route::get('/profile', function () {
-            return view('admin.profile');
-        })->name('profile');
-        
-        Route::get('/settings', function () {
-            return view('admin.settings');
-        })->name('settings');
-        
-        // CMS Routes
-        Route::prefix('cms')->name('cms.')->group(function () {
-            Route::get('/posts', function () {
-                return view('admin.modules.cms.posts');
-            })->name('posts');
-            
-            Route::get('/categories', function () {
-                return view('admin.modules.cms.categories');
-            })->name('categories');
-            
-            Route::get('/media', function () {
-                return view('admin.modules.cms.media');
-            })->name('media');
-            
-            Route::get('/pages', function () {
-                return view('admin.modules.cms.pages');
-            })->name('pages');
-        });
-        
-        // CRM Routes
-        Route::prefix('crm')->name('crm.')->group(function () {
-            Route::get('/contacts', function () {
-                return view('admin.modules.crm.contacts');
-            })->name('contacts');
-            
-            Route::get('/leads', function () {
-                return view('admin.modules.crm.leads');
-            })->name('leads');
-            
-            Route::get('/opportunities', function () {
-                return view('admin.modules.crm.opportunities');
-            })->name('opportunities');
-            
-            Route::get('/companies', function () {
-                return view('admin.modules.crm.companies');
-            })->name('companies');
-            
-            Route::get('/deals', function () {
-                return view('admin.modules.crm.deals');
-            })->name('deals');
-            
-            Route::get('/activities', function () {
-                return view('admin.modules.crm.activities');
-            })->name('activities');
-        });
-        
-        // E-commerce Routes
-        Route::prefix('products')->name('products.')->group(function () {
-            Route::get('/', function () {
-                return view('admin.modules.ecommerce.products.index');
-            })->name('index');
-            
-            Route::get('/create', function () {
-                return view('admin.modules.ecommerce.products.create');
-            })->name('create');
-        });
-        
-        Route::prefix('orders')->name('orders.')->group(function () {
-            Route::get('/', function () {
-                return view('admin.modules.ecommerce.orders.index');
-            })->name('index');
-        });
-        
-        Route::prefix('customers')->name('customers.')->group(function () {
-            Route::get('/', function () {
-                return view('admin.modules.ecommerce.customers.index');
-            })->name('index');
-        });
-        
-        Route::get('/inventory', function () {
-            return view('admin.modules.ecommerce.inventory');
-        })->name('inventory.index');
-        
-        Route::get('/analytics', function () {
-            return view('admin.modules.ecommerce.analytics');
-        })->name('analytics.index');
-        
-        // Job Portal Routes
-        Route::prefix('jobs')->name('jobs.')->group(function () {
-            Route::get('/postings', function () {
-                return view('admin.modules.jobs.postings');
-            })->name('postings');
-            
-            Route::get('/applications', function () {
-                return view('admin.modules.jobs.applications');
-            })->name('applications');
-            
-            Route::get('/employers', function () {
-                return view('admin.modules.jobs.employers');
-            })->name('employers');
-            
-            Route::get('/workflow', function () {
-                return view('admin.modules.jobs.workflow');
-            })->name('workflow');
-            
-            Route::get('/create', function () {
-                return view('admin.modules.jobs.create');
-            })->name('create');
-        });
-        
-        // User Management Routes
+        // 会員管理 (Users)
         Route::prefix('users')->name('users.')->group(function () {
-            Route::get('/', function () {
-                return view('admin.modules.users.index');
-            })->name('index');
-            
-            Route::get('/create', function () {
-                return view('admin.modules.users.create');
-            })->name('create');
-            
-            Route::get('/roles', function () {
-                return view('admin.modules.users.roles');
-            })->name('roles');
-            
-            Route::get('/logs', function () {
-                return view('admin.modules.users.logs');
-            })->name('logs');
+            Route::get('/', [UserController::class, 'index'])->name('index');
+            Route::get('/create', [UserController::class, 'create'])->name('create');
+            Route::post('/', [UserController::class, 'store'])->name('store');
+            Route::get('/{user}/edit', [UserController::class, 'edit'])->name('edit');
+            Route::put('/{user}', [UserController::class, 'update'])->name('update');
+            Route::delete('/{user}', [UserController::class, 'destroy'])->name('destroy');
         });
         
-        // CMS Posts Routes
-        Route::prefix('posts')->name('posts.')->group(function () {
-            Route::get('/create', function () {
-                return view('admin.modules.cms.posts-create');
-            })->name('create');
+        // 申込管理 (Orders)
+        Route::prefix('orders')->name('orders.')->group(function () {
+            Route::get('/', [OrderController::class, 'index'])->name('index');
+            Route::get('/{order}', [OrderController::class, 'show'])->name('show');
+            Route::put('/{order}', [OrderController::class, 'update'])->name('update');
+            Route::delete('/{order}', [OrderController::class, 'destroy'])->name('destroy');
+        });
+        
+        // サブスクリプション管理 (Subscriptions)
+        Route::prefix('subscriptions')->name('subscriptions.')->group(function () {
+            Route::post('/', [SubscriptionController::class, 'store'])->name('store');
+            Route::put('/{subscription}', [SubscriptionController::class, 'update'])->name('update');
+        });
+        
+        // 資料アップロード (Downloads)
+        Route::prefix('downloads')->name('downloads.')->group(function () {
+            Route::get('/', [DownloadController::class, 'index'])->name('index');
+            Route::post('/', [DownloadController::class, 'store'])->name('store');
+            Route::put('/{download}', [DownloadController::class, 'update'])->name('update');
+            Route::delete('/{download}', [DownloadController::class, 'destroy'])->name('destroy');
+        });
+        
+        // お問い合わせ管理 (Inquiries)
+        Route::prefix('inquiries')->name('inquiries.')->group(function () {
+            Route::get('/', [ContactInquiryController::class, 'index'])->name('index');
+            Route::get('/{inquiry}', [ContactInquiryController::class, 'show'])->name('show');
+            Route::put('/{inquiry}', [ContactInquiryController::class, 'update'])->name('update');
+            Route::delete('/{inquiry}', [ContactInquiryController::class, 'destroy'])->name('destroy');
         });
     });
 });
 
-// Social Login Routes (placeholder - requires socialite package)
-Route::get('/auth/{provider}', function ($provider) {
-    // return Socialite::driver($provider)->redirect();
-    return redirect()->route('login')->with('error', 'Social login not configured yet.');
-})->name('social.login');
+// Social Login (placeholder)
+Route::get('/auth/{provider}', fn($provider) => redirect()->route('login')->with('error', 'Social login not configured yet.'))
+    ->name('social.login');
