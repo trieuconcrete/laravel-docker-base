@@ -158,7 +158,7 @@
         <h3 class="modal-title">ファイル編集</h3>
         <button class="modal-close" onclick="closeModal('editModal')">✕</button>
       </div>
-      <form method="POST" id="editForm">
+      <form method="POST" id="editForm" enctype="multipart/form-data">
         @csrf
         @method('PUT')
         <div class="modal-body">
@@ -190,6 +190,15 @@
             </div>
           </div>
           <div class="form-group">
+            <label class="form-label">現在のファイル</label>
+            <div id="editCurrentFile" style="padding:8px 12px;background:var(--soft-mist);border-radius:6px;font-size:13px;"></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">新しいファイル（変更する場合のみ）</label>
+            <input type="file" name="file" class="form-input">
+            <small style="color:var(--text-light);font-size:11px;">※ 選択しない場合は現在のファイルが維持されます</small>
+          </div>
+          <div class="form-group">
             <label class="form-label">
               <input type="checkbox" name="is_active" id="editActive" value="1"> 有効
             </label>
@@ -213,7 +222,22 @@
     document.getElementById('editCategory').value = download.category || 'guide';
     document.getElementById('editPlan').value = download.plan_required || '';
     document.getElementById('editActive').checked = download.is_active;
+    
+    // Show current file info
+    const fileType = (download.file_type || 'file').toUpperCase();
+    const fileSize = download.file_size ? formatFileSize(download.file_size) : '';
+    document.getElementById('editCurrentFile').innerHTML = 
+      '📄 ' + (download.file_name || 'ファイルなし') + 
+      (fileSize ? ' <span style="color:var(--text-light);">(' + fileType + ' • ' + fileSize + ')</span>' : '');
+    
     openModal('editModal');
+  }
+  
+  function formatFileSize(bytes) {
+    if (bytes >= 1073741824) return (bytes / 1073741824).toFixed(2) + ' GB';
+    if (bytes >= 1048576) return (bytes / 1048576).toFixed(2) + ' MB';
+    if (bytes >= 1024) return (bytes / 1024).toFixed(2) + ' KB';
+    return bytes + ' B';
   }
 @endsection
 

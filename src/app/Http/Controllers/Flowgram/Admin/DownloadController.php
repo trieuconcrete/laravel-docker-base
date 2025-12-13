@@ -59,16 +59,36 @@ class DownloadController extends Controller
             'category' => ['required', 'string'],
             'plan_required' => ['nullable', 'string'],
             'is_active' => ['nullable'],
+            'file' => ['nullable', 'file', 'max:102400'], // 100MB max
         ]);
 
-        $download->update([
+        $updateData = [
             'title' => $validated['title'],
             'description' => $validated['description'],
             'category' => $validated['category'],
             'plan_required' => $validated['plan_required'],
             'is_public' => empty($validated['plan_required']),
             'is_active' => $request->has('is_active'),
-        ]);
+        ];
+
+        // Handle file upload if new file provided
+        if ($request->hasFile('file')) {
+            // Delete old file
+            if ($download->file_path && Storage::disk('local')->exists($download->file_path)) {
+                Storage::disk('local')->delete($download->file_path);
+            }
+
+            // Upload new file
+            $file = $request->file('file');
+            $path = $file->store('downloads', 'local');
+            
+            $updateData['file_path'] = $path;
+            $updateData['file_name'] = $file->getClientOriginalName();
+            $updateData['file_type'] = $file->getClientOriginalExtension();
+            $updateData['file_size'] = $file->getSize();
+        }
+
+        $download->update($updateData);
 
         return redirect()->route('admin.downloads.index')
             ->with('success', 'ファイル情報を更新しました');
