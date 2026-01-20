@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\DriverBookingController;
 
 /*
 |--------------------------------------------------------------------------
@@ -13,8 +14,11 @@ use App\Http\Controllers\Admin\DashboardController;
 
 // Public Routes
 Route::get('/', function () {
-    return view('welcome');
-});
+    return view('home');
+})->name('home');
+
+// Driver Booking Routes
+Route::post('/booking', [DriverBookingController::class, 'store'])->name('booking.store');
 
 // Guest Routes (Login/Register)
 Route::middleware('guest')->group(function () {
@@ -80,6 +84,10 @@ Route::middleware(['auth'])->group(function () {
         
         // Dashboard
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+        
+        // Driver Bookings Management
+        Route::get('/bookings', [DriverBookingController::class, 'index'])->name('bookings.index');
+        Route::patch('/bookings/{booking}/status', [DriverBookingController::class, 'updateStatus'])->name('bookings.update-status');
         
         // Profile & Settings
         Route::get('/profile', function () {
