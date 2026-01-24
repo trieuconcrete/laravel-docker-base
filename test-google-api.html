@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Google Maps API</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .status {
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+        .status.loading {
+            background: #fff3cd;
+            color: #856404;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+        }
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .test-section {
+            margin: 30px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .test-section h3 {
+            margin-top: 0;
+            color: #555;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .result {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            display: none;
+        }
+        .result.show {
+            display: block;
+        }
+        .api-info {
+            background: #e7f3ff;
+            padding: 15px;
+            border-left: 4px solid #007bff;
+            margin: 20px 0;
+        }
+        .api-info code {
+            background: #fff;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🗺️ Test Google Maps API</h1>
+        
+        <div class="api-info">
+            <strong>API Key:</strong> <code>AIzaSyB0MEeBbtJ4aUfj-cP9wuDr0GVk49VFLis</code>
+        </div>
+
+        <!-- API Loading Status -->
+        <div id="apiStatus" class="status loading">
+            ⏳ Đang kiểm tra Google Maps API...
+        </div>
+
+        <!-- Test 1: Places Autocomplete -->
+        <div class="test-section">
+            <h3>✅ Test 1: Places Autocomplete</h3>
+            <p>Nhập địa chỉ và xem có gợi ý không:</p>
+            <input type="text" id="autocompleteTest" placeholder="Nhập địa chỉ tại Đà Nẵng...">
+            <div id="autocompleteResult" class="result"></div>
+        </div>
+
+        <!-- Test 2: Distance Matrix -->
+        <div class="test-section">
+            <h3>📏 Test 2: Distance Matrix API</h3>
+            <p>Tính khoảng cách giữa 2 địa điểm:</p>
+            <input type="text" id="origin" placeholder="Điểm đi (vd: Sân bay Đà Nẵng)">
+            <input type="text" id="destination" placeholder="Điểm đến (vd: Cầu Rồng Đà Nẵng)">
+            <button onclick="calculateDistance()">Tính khoảng cách</button>
+            <div id="distanceResult" class="result"></div>
+        </div>
+
+        <!-- API Details -->
+        <div class="test-section">
+            <h3>📋 Thông tin APIs đã enable:</h3>
+            <ul id="apiList">
+                <li>⏳ Đang kiểm tra...</li>
+            </ul>
+        </div>
+    </div>
+
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB0MEeBbtJ4aUfj-cP9wuDr0GVk49VFLis&libraries=places"></script>
+    <script>
+        let autocomplete;
+        let service;
+        
+        // Check if Google Maps API loaded successfully
+        window.onload = function() {
+            const statusDiv = document.getElementById('apiStatus');
+            const apiList = document.getElementById('apiList');
+            
+            if (typeof google !== 'undefined' && google.maps) {
+                statusDiv.className = 'status success';
+                statusDiv.innerHTML = '✅ Google Maps API đã load thành công!';
+                
+                // Initialize Autocomplete
+                try {
+                    const input = document.getElementById('autocompleteTest');
+                    autocomplete = new google.maps.places.Autocomplete(input, {
+                        componentRestrictions: { country: 'vn' },
+                        fields: ['formatted_address', 'geometry']
+                    });
+                    
+                    autocomplete.addListener('place_changed', function() {
+                        const place = autocomplete.getPlace();
+                        const resultDiv = document.getElementById('autocompleteResult');
+                        resultDiv.className = 'result show';
+                        resultDiv.style.background = '#d4edda';
+                        resultDiv.style.color = '#155724';
+                        resultDiv.innerHTML = `
+                            <strong>✅ Places API hoạt động!</strong><br>
+                            Địa chỉ: ${place.formatted_address || 'N/A'}
+                        `;
+                    });
+                    
+                    // Initialize Distance Matrix Service
+                    service = new google.maps.DistanceMatrixService();
+                    
+                    // Update API list
+                    apiList.innerHTML = `
+                        <li>✅ <strong>Maps JavaScript API</strong> - Đang hoạt động</li>
+                        <li>✅ <strong>Places API</strong> - Đang hoạt động (test bằng cách nhập địa chỉ)</li>
+                        <li>⏳ <strong>Distance Matrix API</strong> - Chưa test (nhấn nút "Tính khoảng cách" để test)</li>
+                    `;
+                    
+                } catch (error) {
+                    statusDiv.className = 'status error';
+                    statusDiv.innerHTML = '❌ Lỗi khi khởi tạo: ' + error.message;
+                    apiList.innerHTML = `<li>❌ Có lỗi xảy ra: ${error.message}</li>`;
+                }
+            } else {
+                statusDiv.className = 'status error';
+                statusDiv.innerHTML = '❌ Google Maps API không load được. Kiểm tra API key hoặc internet.';
+                apiList.innerHTML = `
+                    <li>❌ API key có thể không hợp lệ</li>
+                    <li>❌ Hoặc các API chưa được enable trên Google Cloud Console</li>
+                    <li>❌ Hoặc không có kết nối internet</li>
+                `;
+            }
+        };
+        
+        // Test Distance Matrix API
+        function calculateDistance() {
+            const origin = document.getElementById('origin').value.trim();
+            const destination = document.getElementById('destination').value.trim();
+            const resultDiv = document.getElementById('distanceResult');
+            
+            if (!origin || !destination) {
+                resultDiv.className = 'result show';
+                resultDiv.style.background = '#fff3cd';
+                resultDiv.innerHTML = '⚠️ Vui lòng nhập cả điểm đi và điểm đến';
+                return;
+            }
+            
+            resultDiv.className = 'result show';
+            resultDiv.style.background = '#fff3cd';
+            resultDiv.innerHTML = '⏳ Đang tính toán...';
+            
+            service.getDistanceMatrix({
+                origins: [origin],
+                destinations: [destination],
+                travelMode: google.maps.TravelMode.DRIVING,
+                unitSystem: google.maps.UnitSystem.METRIC,
+            }, function(response, status) {
+                if (status === 'OK' && response.rows[0].elements[0].status === 'OK') {
+                    const element = response.rows[0].elements[0];
+                    const distance = element.distance.text;
+                    const duration = element.duration.text;
+                    
+                    resultDiv.style.background = '#d4edda';
+                    resultDiv.style.color = '#155724';
+                    resultDiv.innerHTML = `
+                        <strong>✅ Distance Matrix API hoạt động!</strong><br><br>
+                        📏 <strong>Khoảng cách:</strong> ${distance}<br>
+                        ⏱️ <strong>Thời gian:</strong> ${duration}
+                    `;
+                    
+                    // Update API list
+                    document.getElementById('apiList').innerHTML = `
+                        <li>✅ <strong>Maps JavaScript API</strong> - Đang hoạt động</li>
+                        <li>✅ <strong>Places API</strong> - Đang hoạt động</li>
+                        <li>✅ <strong>Distance Matrix API</strong> - Đang hoạt động</li>
+                    `;
+                } else {
+                    resultDiv.style.background = '#f8d7da';
+                    resultDiv.style.color = '#721c24';
+                    
+                    let errorMsg = '❌ Không thể tính khoảng cách.<br><br>';
+                    
+                    if (status === 'OVER_QUERY_LIMIT') {
+                        errorMsg += 'Lỗi: <strong>OVER_QUERY_LIMIT</strong><br>';
+                        errorMsg += '- Distance Matrix API chưa được enable<br>';
+                        errorMsg += '- Hoặc đã vượt quá quota miễn phí';
+                    } else if (status === 'REQUEST_DENIED') {
+                        errorMsg += 'Lỗi: <strong>REQUEST_DENIED</strong><br>';
+                        errorMsg += '- Distance Matrix API chưa được enable<br>';
+                        errorMsg += '- Hoặc API key bị hạn chế';
+                    } else {
+                        errorMsg += `Lỗi: <strong>${status}</strong><br>`;
+                        errorMsg += 'Kiểm tra lại địa chỉ hoặc API settings';
+                    }
+                    
+                    resultDiv.innerHTML = errorMsg;
+                }
+            });
+        }
+    </script>
+</body>
+</html>

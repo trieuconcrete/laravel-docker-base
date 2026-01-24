@@ -6,6 +6,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Xế Hộ 24/7 - Đà Nẵng | Thuê Tài Xế Lái Xe Hộ</title>
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_MAPS_API_KEY') }}&libraries=places"></script>
     <style>
         :root {
             --bg-dark: #000000;
@@ -502,7 +503,7 @@
 
         .price-row {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 1fr 1fr 1fr;
             border-bottom: 1px solid var(--white-20);
         }
 
@@ -535,6 +536,78 @@
         .price-cell .unit {
             font-size: 14px;
             color: var(--white-60);
+        }
+
+        /* Distance and Price Info */
+        .distance-price-info {
+            margin-top: 15px;
+            padding: 20px;
+            background: linear-gradient(135deg, rgba(201, 162, 39, 0.1) 0%, rgba(212, 168, 75, 0.1) 100%);
+            border-radius: 12px;
+            border: 1px solid var(--gold);
+            display: none;
+        }
+
+        .distance-price-info.show {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .distance-price-info .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--white-20);
+        }
+
+        .distance-price-info .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .distance-price-info .info-label {
+            color: var(--white-80);
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .distance-price-info .info-value {
+            color: var(--gold);
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .distance-price-info .info-note {
+            margin-top: 10px;
+            padding: 10px;
+            background: var(--bg-card);
+            border-radius: 8px;
+            color: var(--white-60);
+            font-size: 13px;
+            text-align: center;
+        }
+
+        .distance-price-info .loading {
+            text-align: center;
+            color: var(--white-60);
+            padding: 20px;
+        }
+
+        .distance-price-info .error {
+            color: var(--red-light);
+            text-align: center;
+            padding: 10px;
         }
 
         /* Features Section */
@@ -1232,6 +1305,45 @@
 
                     <form id="bookingForm" action="{{ route('booking.store') }}" method="POST">
                         @csrf
+                        
+                        <div class="form-group">
+                            <label>Điểm đón</label>
+                            <div class="input-wrapper">
+                                <span class="input-icon">📍</span>
+                                <input type="text" id="pickup_location" name="pickup_location" class="form-input @error('pickup_location') error @enderror" placeholder="Nhập địa chỉ điểm đón..." value="{{ old('pickup_location') }}" required>
+                                @error('pickup_location')
+                                    <div class="error-message">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Điểm đến</label>
+                            <div class="input-wrapper">
+                                <span class="input-icon">🎯</span>
+                                <input type="text" id="dropoff_location" name="dropoff_location" class="form-input" placeholder="Nhập địa chỉ điểm đến..." value="{{ old('dropoff_location') }}">
+                            </div>
+                            
+                            <!-- Distance and Price Info Display -->
+                            <div id="distancePriceInfo" class="distance-price-info">
+                                <div class="loading" id="loadingInfo">
+                                    <span>⏳ Đang tính toán khoảng cách và giá...</span>
+                                </div>
+                                <div id="resultInfo" style="display: none;">
+                                    <div class="info-row">
+                                        <span class="info-label">📏 Quãng đường:</span>
+                                        <span class="info-value" id="distanceValue">-</span>
+                                    </div>
+                                    <div class="info-row">
+                                        <span class="info-label">💰 Giá ước tính:</span>
+                                        <span class="info-value" id="priceValue">-</span>
+                                    </div>
+                                    <div class="info-note" id="priceNote" style="display: none;"></div>
+                                </div>
+                                <div id="errorInfo" class="error" style="display: none;"></div>
+                            </div>
+                        </div>
+
                         <div class="form-group">
                             <label>Thông tin liên hệ</label>
                             <div class="form-row">
@@ -1249,25 +1361,6 @@
                                         <div class="error-message">{{ $message }}</div>
                                     @enderror
                                 </div>
-                            </div>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>Điểm đón</label>
-                            <div class="input-wrapper">
-                                <span class="input-icon">📍</span>
-                                <input type="text" name="pickup_location" class="form-input @error('pickup_location') error @enderror" placeholder="Nhập địa chỉ điểm đón..." value="{{ old('pickup_location') }}" required>
-                                @error('pickup_location')
-                                    <div class="error-message">{{ $message }}</div>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Điểm đến</label>
-                            <div class="input-wrapper">
-                                <span class="input-icon">🎯</span>
-                                <input type="text" name="dropoff_location" class="form-input" placeholder="Nhập địa chỉ điểm đến..." value="{{ old('dropoff_location') }}">
                             </div>
                         </div>
 
@@ -1455,10 +1548,6 @@
                 </p>
             </div>
 
-            <div class="pricing-image">
-                <img src="{{ asset('images/price.jpeg') }}" alt="Bảng giá Xế Hộ 24/7">
-            </div>
-
             <div class="price-table">
                 <div class="price-table-header">
                     <h3>BẢNG GIÁ THUÊ TÀI XẾ LÁI XE HỘ</h3>
@@ -1470,7 +1559,8 @@
                 </div>
                 <div class="price-row">
                     <div class="price-cell header">Giá Mở Cửa<br><small>(từ 0-5km)</small></div>
-                    <div class="price-cell header">Từ 5km đến 20km</div>
+                    <div class="price-cell header">Từ 5km đến 30km</div>
+                    <div class="price-cell header">Từ 30km trở đi</div>
                 </div>
                 <div class="price-row">
                     <div class="price-cell">
@@ -1481,6 +1571,10 @@
                         <span class="price">150.000Đ + 15.000Đ</span><br>
                         <span class="unit">/km</span>
                     </div>
+                    <div class="price-cell">
+                        <span class="price">Thỏa thuận</span><br>
+                        <span class="unit"></span>
+                    </div>
                 </div>
 
                 <!-- Giá ban đêm -->
@@ -1489,7 +1583,8 @@
                 </div>
                 <div class="price-row">
                     <div class="price-cell header">Giá Mở Cửa<br><small>(từ 0-5km)</small></div>
-                    <div class="price-cell header">Từ 5km đến 20km</div>
+                    <div class="price-cell header">Từ 5km đến 30km</div>
+                    <div class="price-cell header">Từ 30km trở đi</div>
                 </div>
                 <div class="price-row">
                     <div class="price-cell">
@@ -1499,6 +1594,10 @@
                     <div class="price-cell">
                         <span class="price">200.000Đ + 15.000Đ</span><br>
                         <span class="unit">/km</span>
+                    </div>
+                    <div class="price-cell">
+                        <span class="price">Thỏa thuận</span><br>
+                        <span class="unit"></span>
                     </div>
                 </div>
             </div>
@@ -1710,6 +1809,157 @@
                 nav.style.background = 'rgba(0, 0, 0, 0.95)';
             }
         });
+
+        // Google Maps Distance Matrix and Price Calculation
+        let calculateTimeout = null;
+        
+        // Initialize Google Places Autocomplete
+        function initAutocomplete() {
+            const pickupInput = document.getElementById('pickup_location');
+            const dropoffInput = document.getElementById('dropoff_location');
+            
+            if (pickupInput && dropoffInput && typeof google !== 'undefined') {
+                // Create autocomplete for both inputs
+                const pickupAutocomplete = new google.maps.places.Autocomplete(pickupInput, {
+                    componentRestrictions: { country: 'vn' },
+                    fields: ['formatted_address', 'geometry']
+                });
+                
+                const dropoffAutocomplete = new google.maps.places.Autocomplete(dropoffInput, {
+                    componentRestrictions: { country: 'vn' },
+                    fields: ['formatted_address', 'geometry']
+                });
+                
+                // Calculate distance when both locations are filled
+                dropoffInput.addEventListener('input', function() {
+                    clearTimeout(calculateTimeout);
+                    calculateTimeout = setTimeout(() => {
+                        calculateDistanceAndPrice();
+                    }, 1000);
+                });
+                
+                pickupInput.addEventListener('input', function() {
+                    clearTimeout(calculateTimeout);
+                    calculateTimeout = setTimeout(() => {
+                        calculateDistanceAndPrice();
+                    }, 1000);
+                });
+            }
+        }
+        
+        // Calculate price based on distance
+        function calculatePrice(distanceKm) {
+            const currentHour = new Date().getHours();
+            let price = 0;
+            let priceNote = '';
+            
+            // Determine if it's day (6h-23h59) or night (0h-5h59)
+            const isNightTime = currentHour >= 0 && currentHour < 6;
+            const basePrice = isNightTime ? 200000 : 150000;
+            const perKmPrice = 15000;
+            
+            if (distanceKm > 30) {
+                // Over 30km - need to contact hotline
+                return {
+                    price: null,
+                    message: '📞 Liên hệ hotline 0559 304 993 để thỏa thuận giá cả',
+                    note: 'Khoảng cách trên 30km, vui lòng liên hệ để được báo giá chính xác'
+                };
+            } else if (distanceKm <= 5) {
+                // 0-5km: Base price only
+                price = basePrice;
+                priceNote = `Giá mở cửa (0-5km) ${isNightTime ? 'ban đêm' : 'ban ngày'}`;
+            } else {
+                // 5-30km: Base price + per km charge
+                price = basePrice + (distanceKm - 5) * perKmPrice;
+                priceNote = `${basePrice.toLocaleString('vi-VN')}đ (giá mở cửa) + ${((distanceKm - 5) * perKmPrice).toLocaleString('vi-VN')}đ (${(distanceKm - 5).toFixed(1)}km × 15.000đ)`;
+            }
+            
+            return {
+                price: price,
+                message: price.toLocaleString('vi-VN') + 'đ',
+                note: priceNote
+            };
+        }
+        
+        // Calculate distance using Google Distance Matrix API
+        function calculateDistanceAndPrice() {
+            const pickupLocation = document.getElementById('pickup_location').value.trim();
+            const dropoffLocation = document.getElementById('dropoff_location').value.trim();
+            const infoContainer = document.getElementById('distancePriceInfo');
+            const loadingInfo = document.getElementById('loadingInfo');
+            const resultInfo = document.getElementById('resultInfo');
+            const errorInfo = document.getElementById('errorInfo');
+            const distanceValue = document.getElementById('distanceValue');
+            const priceValue = document.getElementById('priceValue');
+            const priceNote = document.getElementById('priceNote');
+            
+            // Reset display
+            if (!pickupLocation || !dropoffLocation) {
+                infoContainer.classList.remove('show');
+                return;
+            }
+            
+            // Show loading
+            infoContainer.classList.add('show');
+            loadingInfo.style.display = 'block';
+            resultInfo.style.display = 'none';
+            errorInfo.style.display = 'none';
+            
+            // Create Distance Matrix service
+            const service = new google.maps.DistanceMatrixService();
+            
+            service.getDistanceMatrix({
+                origins: [pickupLocation],
+                destinations: [dropoffLocation],
+                travelMode: google.maps.TravelMode.DRIVING,
+                unitSystem: google.maps.UnitSystem.METRIC,
+            }, function(response, status) {
+                loadingInfo.style.display = 'none';
+                
+                if (status === 'OK' && response.rows[0].elements[0].status === 'OK') {
+                    const distance = response.rows[0].elements[0].distance;
+                    const distanceKm = distance.value / 1000; // Convert to km
+                    const distanceText = distance.text;
+                    
+                    // Calculate price
+                    const priceInfo = calculatePrice(distanceKm);
+                    
+                    // Display results
+                    distanceValue.textContent = distanceText;
+                    
+                    if (priceInfo.price === null) {
+                        // Over 30km case
+                        priceValue.textContent = priceInfo.message;
+                        priceValue.style.fontSize = '14px';
+                        priceNote.textContent = priceInfo.note;
+                        priceNote.style.display = 'block';
+                        priceNote.style.background = 'rgba(230, 57, 70, 0.2)';
+                        priceNote.style.color = 'var(--red-light)';
+                    } else {
+                        priceValue.textContent = priceInfo.message;
+                        priceValue.style.fontSize = '18px';
+                        priceNote.textContent = priceInfo.note;
+                        priceNote.style.display = 'block';
+                        priceNote.style.background = 'var(--bg-card)';
+                        priceNote.style.color = 'var(--white-60)';
+                    }
+                    
+                    resultInfo.style.display = 'block';
+                } else {
+                    // Error case
+                    errorInfo.textContent = '❌ Không thể tính khoảng cách. Vui lòng kiểm tra lại địa chỉ.';
+                    errorInfo.style.display = 'block';
+                }
+            });
+        }
+        
+        // Initialize when page loads
+        if (typeof google !== 'undefined') {
+            google.maps.event.addDomListener(window, 'load', initAutocomplete);
+        } else {
+            window.addEventListener('load', initAutocomplete);
+        }
     </script>
 </body>
 </html>
