@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\DriverBookingController;
+use App\Http\Controllers\SupportRequestController;
 
 /*
 |--------------------------------------------------------------------------
@@ -20,6 +21,9 @@ Route::get('/', function () {
 // Driver Booking Routes
 Route::post('/booking', [DriverBookingController::class, 'store'])->name('booking.store');
 
+// Support Request Routes
+Route::post('/support-request', [SupportRequestController::class, 'store'])->name('support.store');
+
 // Guest Routes (Login/Register)
 Route::middleware('guest')->group(function () {
     Route::get('/login', function () {
@@ -34,7 +38,7 @@ Route::middleware('guest')->group(function () {
 
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
-            return redirect()->intended(route('admin.dashboard'));
+            return redirect()->intended(route('admin.bookings.index'));
         }
 
         return back()->withErrors([
@@ -59,7 +63,7 @@ Route::middleware('guest')->group(function () {
 
         Auth::login($user);
 
-        return redirect()->route('admin.dashboard')->with('success', 'Đăng ký thành công!');
+        return redirect()->route('admin.bookings.index')->with('success', 'Đăng ký thành công!');
     })->name('register');
 });
 
@@ -222,6 +226,13 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/create', function () {
                 return view('admin.modules.cms.posts-create');
             })->name('create');
+        });
+
+        // Support Requests Routes
+        Route::prefix('support-requests')->name('support-requests.')->group(function () {
+            Route::get('/', [SupportRequestController::class, 'index'])->name('index');
+            Route::patch('/{supportRequest}/status', [SupportRequestController::class, 'updateStatus'])->name('update-status');
+            Route::delete('/{supportRequest}', [SupportRequestController::class, 'destroy'])->name('destroy');
         });
     });
 });

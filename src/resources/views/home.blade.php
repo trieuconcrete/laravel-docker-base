@@ -6,7 +6,10 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Xế Hộ 24/7 - Đà Nẵng | Thuê Tài Xế Lái Xe Hộ</title>
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <script src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_MAPS_API_KEY') }}&libraries=places"></script>
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- OpenStreetMap & Leaflet for maps (optional, only if needed for display) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         :root {
             --bg-dark: #000000;
@@ -191,6 +194,42 @@
         .nav-logo-text span:last-child {
             font-size: 11px;
             color: var(--white-60);
+        }
+
+        .nav-social {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-left: 30px;
+            padding-left: 30px;
+            border-left: 1px solid var(--white-20);
+        }
+
+        .social-icon {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(201, 162, 39, 0.1);
+            border-radius: 50%;
+            color: var(--gold);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+
+        .social-icon:hover {
+            background: var(--gold);
+            color: var(--bg-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(201, 162, 39, 0.3);
+        }
+
+        .social-icon svg {
+            width: 18px;
+            height: 18px;
+            fill: currentColor;
         }
 
         .nav-links {
@@ -398,6 +437,42 @@
             border-radius: 20px;
             border: 2px solid var(--gold);
             box-shadow: 0 20px 60px rgba(201, 162, 39, 0.2);
+        }
+
+        .services-video {
+            margin-bottom: 60px;
+            text-align: center;
+        }
+
+        .services-video h3 {
+            color: var(--gold);
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .video-container {
+            position: relative;
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+            padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+            height: 0;
+            overflow: hidden;
+            border-radius: 20px;
+            border: 2px solid var(--gold);
+            box-shadow: 0 20px 60px rgba(201, 162, 39, 0.3);
+            background: var(--bg-card);
+        }
+
+        .video-container iframe,
+        .video-container video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
         }
 
         .services-grid {
@@ -677,6 +752,18 @@
         @media (max-width: 968px) {
             .booking-grid {
                 grid-template-columns: 1fr;
+            }
+            
+            .nav-social {
+                display: none;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+            
+            nav .nav-container {
+                justify-content: space-between;
             }
         }
 
@@ -1256,6 +1343,85 @@
             margin-bottom: 20px;
             text-align: center;
         }
+
+        /* Autocomplete Dropdown */
+        .autocomplete-wrapper {
+            position: relative;
+        }
+
+        .autocomplete-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: var(--bg-card);
+            border: 1px solid var(--gold);
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .autocomplete-dropdown.show {
+            display: block;
+        }
+
+        .autocomplete-item {
+            padding: 12px 15px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            border-bottom: 1px solid var(--white-20);
+            color: var(--white-80);
+            font-size: 14px;
+        }
+
+        .autocomplete-item:last-child {
+            border-bottom: none;
+        }
+
+        .autocomplete-item:hover {
+            background: rgba(201, 162, 39, 0.2);
+        }
+
+        .autocomplete-item.active {
+            background: rgba(201, 162, 39, 0.3);
+        }
+
+        .autocomplete-item .item-name {
+            font-weight: 600;
+            color: var(--gold);
+            margin-bottom: 4px;
+        }
+
+        .autocomplete-item .item-address {
+            font-size: 12px;
+            color: var(--white-60);
+        }
+
+        .autocomplete-loading {
+            padding: 15px;
+            text-align: center;
+            color: var(--white-60);
+            font-size: 13px;
+        }
+
+        .autocomplete-no-results {
+            padding: 15px;
+            text-align: center;
+            color: var(--white-40);
+            font-size: 13px;
+        }
+
+        .autocomplete-icon {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            margin-right: 8px;
+            color: var(--gold);
+        }
     </style>
 </head>
 <body>
@@ -1269,6 +1435,26 @@
                     <span>Đà Nẵng - An toàn - Uy tín</span>
                 </div>
             </a>
+            
+            <!-- Social Media Icons -->
+            <div class="nav-social">
+                <a href="https://www.tiktok.com/@xeho247danang" target="_blank" rel="noopener" class="social-icon" title="TikTok">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/>
+                    </svg>
+                </a>
+                <a href="https://www.facebook.com/xeho247danang" target="_blank" rel="noopener" class="social-icon" title="Facebook">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                    </svg>
+                </a>
+                <a href="https://www.youtube.com/@xeho247danang" target="_blank" rel="noopener" class="social-icon" title="YouTube">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                    </svg>
+                </a>
+            </div>
+            
             <div class="nav-links">
                 <a href="#booking">Đặt xe</a>
                 <a href="#services">Dịch vụ</a>
@@ -1297,14 +1483,12 @@
                         </div>
                     </div>
 
-                    @if(session('success'))
-                        <div class="success-message">
-                            {{ session('success') }}
-                        </div>
-                    @endif
-
                     <form id="bookingForm" action="{{ route('booking.store') }}" method="POST">
                         @csrf
+                        
+                        <!-- Hidden fields for distance and price -->
+                        <input type="hidden" id="distance_hidden" name="distance" value="">
+                        <input type="hidden" id="price_hidden" name="price" value="">
                         
                         <div class="form-group">
                             <label>Điểm đón</label>
@@ -1473,6 +1657,33 @@
 
             <div class="services-image">
                 <img src="{{ asset('images/service.jpeg') }}" alt="Dịch vụ Xế Hộ 24/7 Đà Nẵng">
+            </div>
+
+            <!-- Services Video -->
+            <div class="services-video">
+                <h3>🎬 Xem Video Giới Thiệu Dịch Vụ</h3>
+                <div class="video-container">
+                    <!-- YouTube Video -->
+                    <iframe 
+                        width="560" 
+                        height="315" 
+                        src="https://www.youtube.com/embed/TyOsUjfrKjQ?si=-vMspfNMFqIq2Lto" 
+                        title="YouTube video player" 
+                        frameborder="0" 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                        referrerpolicy="strict-origin-when-cross-origin" 
+                        allowfullscreen>
+                    </iframe>
+                    
+                    <!-- Option 2: Local Video (uncomment to use local video instead) -->
+                    <!--
+                    <video controls poster="{{ asset('images/video-thumbnail.jpg') }}">
+                        <source src="{{ asset('videos/intro.mp4') }}" type="video/mp4">
+                        <source src="{{ asset('videos/intro.webm') }}" type="video/webm">
+                        Trình duyệt của bạn không hỗ trợ video.
+                    </video>
+                    -->
+                </div>
             </div>
 
             <div class="services-grid">
@@ -1696,15 +1907,17 @@
 
                 <div class="contact-form-box">
                     <h3>Gửi yêu cầu hỗ trợ</h3>
-                    <form>
+
+                    <form action="{{ route('support.store') }}" method="POST" id="supportForm">
+                        @csrf
                         <div class="form-group">
-                            <input type="text" class="form-input" placeholder="Họ và tên" style="padding-left: 20px;">
+                            <input type="text" name="name" class="form-input" placeholder="Họ và tên" value="{{ old('name') }}" required style="padding-left: 20px;">
                         </div>
                         <div class="form-group">
-                            <input type="tel" class="form-input" placeholder="Số điện thoại" style="padding-left: 20px;">
+                            <input type="tel" name="phone" class="form-input" placeholder="Số điện thoại" value="{{ old('phone') }}" required style="padding-left: 20px;">
                         </div>
                         <div class="form-group">
-                            <textarea class="form-textarea" placeholder="Nội dung cần hỗ trợ..."></textarea>
+                            <textarea name="message" class="form-textarea" placeholder="Nội dung cần hỗ trợ..." required>{{ old('message') }}</textarea>
                         </div>
                         <button type="submit" class="btn-gold" style="width: 100%; justify-content: center;">
                             Gửi yêu cầu
@@ -1731,11 +1944,20 @@
                         Dịch vụ thuê tài xế và lái xe hộ chuyên nghiệp tại Đà Nẵng. Bạn uống - Chúng tôi lái!
                     </p>
                     <div class="social-links">
-                        <a href="#" class="social-link">
-                            <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                        <a href="https://www.tiktok.com/@xeho247danang" target="_blank" rel="noopener" class="social-link" title="TikTok">
+                            <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/>
+                            </svg>
                         </a>
-                        <a href="#" class="social-link">
-                            <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.085.345-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.401.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.92-7.252 4.158 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.354-.629-2.758-1.379l-.749 2.848c-.269 1.045-1.004 2.352-1.498 3.146 1.123.345 2.306.535 3.55.535 6.607 0 11.985-5.365 11.985-11.987C23.97 5.39 18.592.026 11.985.026L12.017 0z"/></svg>
+                        <a href="https://www.facebook.com/xeho247danang" target="_blank" rel="noopener" class="social-link" title="Facebook">
+                            <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                            </svg>
+                        </a>
+                        <a href="https://www.youtube.com/@xeho247danang" target="_blank" rel="noopener" class="social-link" title="YouTube">
+                            <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                            </svg>
                         </a>
                     </div>
                 </div>
@@ -1810,40 +2032,194 @@
             }
         });
 
-        // Google Maps Distance Matrix and Price Calculation
+        // OpenStreetMap + Nominatim + OSRM - Hoàn toàn MIỄN PHÍ!
         let calculateTimeout = null;
+        let autocompleteTimeout = null;
+        let autocompleteCache = {};
+        let currentFocusedIndex = -1;
         
-        // Initialize Google Places Autocomplete
+        // Initialize Address Autocomplete using Nominatim
         function initAutocomplete() {
             const pickupInput = document.getElementById('pickup_location');
             const dropoffInput = document.getElementById('dropoff_location');
             
-            if (pickupInput && dropoffInput && typeof google !== 'undefined') {
-                // Create autocomplete for both inputs
-                const pickupAutocomplete = new google.maps.places.Autocomplete(pickupInput, {
-                    componentRestrictions: { country: 'vn' },
-                    fields: ['formatted_address', 'geometry']
-                });
+            if (pickupInput && dropoffInput) {
+                // Wrap inputs in autocomplete wrapper
+                wrapInputWithAutocomplete(pickupInput);
+                wrapInputWithAutocomplete(dropoffInput);
                 
-                const dropoffAutocomplete = new google.maps.places.Autocomplete(dropoffInput, {
-                    componentRestrictions: { country: 'vn' },
-                    fields: ['formatted_address', 'geometry']
-                });
+                // Setup autocomplete for pickup
+                setupAddressAutocomplete(pickupInput);
+                // Setup autocomplete for dropoff
+                setupAddressAutocomplete(dropoffInput);
                 
                 // Calculate distance when both locations are filled
                 dropoffInput.addEventListener('input', function() {
                     clearTimeout(calculateTimeout);
                     calculateTimeout = setTimeout(() => {
                         calculateDistanceAndPrice();
-                    }, 1000);
+                    }, 1500);
                 });
                 
                 pickupInput.addEventListener('input', function() {
                     clearTimeout(calculateTimeout);
                     calculateTimeout = setTimeout(() => {
                         calculateDistanceAndPrice();
-                    }, 1000);
+                    }, 1500);
                 });
+            }
+        }
+        
+        // Wrap input with autocomplete wrapper
+        function wrapInputWithAutocomplete(input) {
+            const wrapper = input.closest('.input-wrapper');
+            if (!wrapper.classList.contains('autocomplete-wrapper')) {
+                wrapper.classList.add('autocomplete-wrapper');
+                
+                // Create dropdown
+                const dropdown = document.createElement('div');
+                dropdown.className = 'autocomplete-dropdown';
+                dropdown.id = input.id + '_dropdown';
+                wrapper.appendChild(dropdown);
+                
+                // Close dropdown when clicking outside
+                document.addEventListener('click', function(e) {
+                    if (!wrapper.contains(e.target)) {
+                        dropdown.classList.remove('show');
+                    }
+                });
+            }
+        }
+        
+        // Setup autocomplete for an input using Nominatim API
+        function setupAddressAutocomplete(input) {
+            const dropdown = document.getElementById(input.id + '_dropdown');
+            let suggestions = [];
+            
+            // Input event
+            input.addEventListener('input', async function() {
+                const query = this.value.trim();
+                clearTimeout(autocompleteTimeout);
+                currentFocusedIndex = -1;
+                
+                if (query.length < 3) {
+                    dropdown.classList.remove('show');
+                    return;
+                }
+                
+                // Show loading
+                dropdown.innerHTML = '<div class="autocomplete-loading">🔍 Đang tìm kiếm...</div>';
+                dropdown.classList.add('show');
+                
+                autocompleteTimeout = setTimeout(async () => {
+                    try {
+                        // Check cache
+                        const cacheKey = query.toLowerCase();
+                        if (autocompleteCache[cacheKey]) {
+                            suggestions = autocompleteCache[cacheKey];
+                            displaySuggestions(dropdown, suggestions, input);
+                            return;
+                        }
+                        
+                        // Nominatim search with Vietnam bounds and Da Nang priority
+                        const response = await fetch(
+                            `https://nominatim.openstreetmap.org/search?` +
+                            `format=json&q=${encodeURIComponent(query + ', Đà Nẵng')}&` +
+                            `countrycodes=vn&` +
+                            `limit=8&` +
+                            `addressdetails=1`,
+                            {
+                                headers: {
+                                    'User-Agent': 'XeHo247DaNang/1.0'
+                                }
+                            }
+                        );
+                        const data = await response.json();
+                        
+                        if (data && data.length > 0) {
+                            suggestions = data;
+                            autocompleteCache[cacheKey] = data; // Cache results
+                            displaySuggestions(dropdown, suggestions, input);
+                        } else {
+                            dropdown.innerHTML = '<div class="autocomplete-no-results">❌ Không tìm thấy địa chỉ</div>';
+                        }
+                    } catch (error) {
+                        console.log('Autocomplete error:', error);
+                        dropdown.innerHTML = '<div class="autocomplete-no-results">⚠️ Lỗi kết nối</div>';
+                    }
+                }, 500);
+            });
+            
+            // Keyboard navigation
+            input.addEventListener('keydown', function(e) {
+                const items = dropdown.querySelectorAll('.autocomplete-item');
+                
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    currentFocusedIndex = (currentFocusedIndex + 1) % items.length;
+                    updateActiveItem(items);
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    currentFocusedIndex = currentFocusedIndex <= 0 ? items.length - 1 : currentFocusedIndex - 1;
+                    updateActiveItem(items);
+                } else if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (currentFocusedIndex >= 0 && items[currentFocusedIndex]) {
+                        items[currentFocusedIndex].click();
+                    }
+                } else if (e.key === 'Escape') {
+                    dropdown.classList.remove('show');
+                }
+            });
+        }
+        
+        // Display suggestions in dropdown
+        function displaySuggestions(dropdown, suggestions, input) {
+            dropdown.innerHTML = '';
+            
+            suggestions.forEach((place, index) => {
+                const item = document.createElement('div');
+                item.className = 'autocomplete-item';
+                
+                // Extract name and address
+                const name = place.name || place.display_name.split(',')[0];
+                const address = place.display_name;
+                
+                item.innerHTML = `
+                    <div class="item-name">📍 ${name}</div>
+                    <div class="item-address">${address}</div>
+                `;
+                
+                // Store coordinates
+                item.dataset.lat = place.lat;
+                item.dataset.lon = place.lon;
+                item.dataset.address = address;
+                
+                // Click event
+                item.addEventListener('click', function() {
+                    input.value = address;
+                    dropdown.classList.remove('show');
+                    currentFocusedIndex = -1;
+                    
+                    // Trigger distance calculation
+                    input.dispatchEvent(new Event('input'));
+                });
+                
+                dropdown.appendChild(item);
+            });
+            
+            dropdown.classList.add('show');
+        }
+        
+        // Update active item in keyboard navigation
+        function updateActiveItem(items) {
+            items.forEach((item, index) => {
+                item.classList.toggle('active', index === currentFocusedIndex);
+            });
+            
+            // Scroll to active item
+            if (items[currentFocusedIndex]) {
+                items[currentFocusedIndex].scrollIntoView({ block: 'nearest' });
             }
         }
         
@@ -1882,8 +2258,37 @@
             };
         }
         
-        // Calculate distance using Google Distance Matrix API
-        function calculateDistanceAndPrice() {
+        // Geocode address to coordinates using Nominatim
+        async function geocodeAddress(address) {
+            try {
+                const response = await fetch(
+                    `https://nominatim.openstreetmap.org/search?` +
+                    `format=json&q=${encodeURIComponent(address)}&` +
+                    `countrycodes=vn&` +
+                    `limit=1`,
+                    {
+                        headers: {
+                            'User-Agent': 'XeHo247DaNang/1.0'
+                        }
+                    }
+                );
+                const data = await response.json();
+                
+                if (data && data.length > 0) {
+                    return {
+                        lat: parseFloat(data[0].lat),
+                        lon: parseFloat(data[0].lon)
+                    };
+                }
+                return null;
+            } catch (error) {
+                console.error('Geocoding error:', error);
+                return null;
+            }
+        }
+        
+        // Calculate distance using OSRM (Open Source Routing Machine)
+        async function calculateDistanceAndPrice() {
             const pickupLocation = document.getElementById('pickup_location').value.trim();
             const dropoffLocation = document.getElementById('dropoff_location').value.trim();
             const infoContainer = document.getElementById('distancePriceInfo');
@@ -1906,59 +2311,164 @@
             resultInfo.style.display = 'none';
             errorInfo.style.display = 'none';
             
-            // Create Distance Matrix service
-            const service = new google.maps.DistanceMatrixService();
-            
-            service.getDistanceMatrix({
-                origins: [pickupLocation],
-                destinations: [dropoffLocation],
-                travelMode: google.maps.TravelMode.DRIVING,
-                unitSystem: google.maps.UnitSystem.METRIC,
-            }, function(response, status) {
+            try {
+                // Step 1: Geocode both addresses
+                const pickupCoords = await geocodeAddress(pickupLocation + ', Đà Nẵng, Việt Nam');
+                const dropoffCoords = await geocodeAddress(dropoffLocation + ', Đà Nẵng, Việt Nam');
+                
+                if (!pickupCoords || !dropoffCoords) {
+                    throw new Error('Không tìm thấy địa chỉ');
+                }
+                
+                // Step 2: Calculate route using OSRM
+                const osrmUrl = `https://router.project-osrm.org/route/v1/driving/` +
+                    `${pickupCoords.lon},${pickupCoords.lat};${dropoffCoords.lon},${dropoffCoords.lat}` +
+                    `?overview=false&alternatives=false&steps=false`;
+                
+                const routeResponse = await fetch(osrmUrl);
+                const routeData = await routeResponse.json();
+                
+                if (routeData.code !== 'Ok' || !routeData.routes || routeData.routes.length === 0) {
+                    throw new Error('Không thể tính khoảng cách');
+                }
+                
+                // Get distance in meters, convert to km
+                const distanceMeters = routeData.routes[0].distance;
+                const distanceKm = distanceMeters / 1000;
+                const distanceText = distanceKm.toFixed(1) + ' km';
+                
                 loadingInfo.style.display = 'none';
                 
-                if (status === 'OK' && response.rows[0].elements[0].status === 'OK') {
-                    const distance = response.rows[0].elements[0].distance;
-                    const distanceKm = distance.value / 1000; // Convert to km
-                    const distanceText = distance.text;
-                    
-                    // Calculate price
-                    const priceInfo = calculatePrice(distanceKm);
-                    
-                    // Display results
-                    distanceValue.textContent = distanceText;
-                    
-                    if (priceInfo.price === null) {
-                        // Over 30km case
-                        priceValue.textContent = priceInfo.message;
-                        priceValue.style.fontSize = '14px';
-                        priceNote.textContent = priceInfo.note;
-                        priceNote.style.display = 'block';
-                        priceNote.style.background = 'rgba(230, 57, 70, 0.2)';
-                        priceNote.style.color = 'var(--red-light)';
-                    } else {
-                        priceValue.textContent = priceInfo.message;
-                        priceValue.style.fontSize = '18px';
-                        priceNote.textContent = priceInfo.note;
-                        priceNote.style.display = 'block';
-                        priceNote.style.background = 'var(--bg-card)';
-                        priceNote.style.color = 'var(--white-60)';
-                    }
-                    
-                    resultInfo.style.display = 'block';
+                // Calculate price
+                const priceInfo = calculatePrice(distanceKm);
+                
+                // Display results
+                distanceValue.textContent = distanceText;
+                
+                // Set hidden field values for form submission
+                document.getElementById('distance_hidden').value = distanceKm.toFixed(2);
+                
+                if (priceInfo.price === null) {
+                    // Over 30km case - don't set price
+                    document.getElementById('price_hidden').value = '';
+                    priceValue.textContent = priceInfo.message;
+                    priceValue.style.fontSize = '14px';
+                    priceNote.textContent = priceInfo.note;
+                    priceNote.style.display = 'block';
+                    priceNote.style.background = 'rgba(230, 57, 70, 0.2)';
+                    priceNote.style.color = 'var(--red-light)';
                 } else {
-                    // Error case
-                    errorInfo.textContent = '❌ Không thể tính khoảng cách. Vui lòng kiểm tra lại địa chỉ.';
-                    errorInfo.style.display = 'block';
+                    // Set price for form submission
+                    document.getElementById('price_hidden').value = priceInfo.price;
+                    priceValue.textContent = priceInfo.message;
+                    priceValue.style.fontSize = '18px';
+                    priceNote.textContent = priceInfo.note;
+                    priceNote.style.display = 'block';
+                    priceNote.style.background = 'var(--bg-card)';
+                    priceNote.style.color = 'var(--white-60)';
                 }
-            });
+                
+                resultInfo.style.display = 'block';
+                
+            } catch (error) {
+                loadingInfo.style.display = 'none';
+                errorInfo.textContent = '❌ ' + (error.message || 'Không thể tính khoảng cách. Vui lòng kiểm tra lại địa chỉ.');
+                errorInfo.style.display = 'block';
+            }
         }
         
         // Initialize when page loads
-        if (typeof google !== 'undefined') {
-            google.maps.event.addDomListener(window, 'load', initAutocomplete);
-        } else {
-            window.addEventListener('load', initAutocomplete);
+        window.addEventListener('DOMContentLoaded', initAutocomplete);
+
+        // Check if page was just loaded after form submission
+        window.addEventListener('DOMContentLoaded', function() {
+            // Check URL hash or session to determine which form was submitted
+            const urlParams = new URLSearchParams(window.location.search);
+            const formType = urlParams.get('form');
+            
+            if (formType === 'booking') {
+                // Scroll to booking section after booking form submission
+                setTimeout(() => {
+                    document.getElementById('booking')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 100);
+            } else if (formType === 'support') {
+                // Scroll to contact section after support form submission
+                setTimeout(() => {
+                    document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 100);
+            }
+        });
+
+        // SweetAlert2 for booking form
+        @if(session('success'))
+            const successMessage = '{{ session('success') }}';
+            const isBookingSuccess = successMessage.includes('đặt xe') || successMessage.includes('booking');
+            
+            Swal.fire({
+                icon: 'success',
+                title: 'Thành công!',
+                text: successMessage,
+                confirmButtonText: 'Đóng',
+                confirmButtonColor: '#C9A227',
+                background: '#1A1A1A',
+                color: '#FFFFFF',
+                timer: 5000,
+                timerProgressBar: true,
+                showClass: {
+                    popup: 'animate__animated animate__fadeInDown'
+                },
+                hideClass: {
+                    popup: 'animate__animated animate__fadeOutUp'
+                }
+            }).then(() => {
+                // Scroll to appropriate section based on form type
+                if (isBookingSuccess) {
+                    document.getElementById('booking')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                } else {
+                    document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        @endif
+
+        @if($errors->any())
+            Swal.fire({
+                icon: 'error',
+                title: 'Có lỗi xảy ra!',
+                html: '<ul style="text-align: left; padding-left: 20px;">@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul>',
+                confirmButtonText: 'Đóng',
+                confirmButtonColor: '#E63946',
+                background: '#1A1A1A',
+                color: '#FFFFFF',
+                showClass: {
+                    popup: 'animate__animated animate__fadeInDown'
+                },
+                hideClass: {
+                    popup: 'animate__animated animate__fadeOutUp'
+                }
+            }).then(() => {
+                // Scroll to booking section on error (most errors are from booking form)
+                document.getElementById('booking')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+        @endif
+
+        // Form submission with loading - Booking Form
+        const bookingForm = document.getElementById('bookingForm');
+        if (bookingForm) {
+            bookingForm.addEventListener('submit', function(e) {
+                const submitBtn = this.querySelector('button[type="submit"]');
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Đang gửi...';
+            });
+        }
+
+        // Form submission with loading - Support Form
+        const supportForm = document.getElementById('supportForm');
+        if (supportForm) {
+            supportForm.addEventListener('submit', function(e) {
+                const submitBtn = this.querySelector('button[type="submit"]');
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Đang gửi...';
+            });
         }
     </script>
 </body>

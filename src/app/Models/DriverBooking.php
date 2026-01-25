@@ -14,6 +14,8 @@ class DriverBooking extends Model
         'phone',
         'pickup_location',
         'dropoff_location',
+        'distance',
+        'price',
         'notes',
         'status',
         'booking_date',
