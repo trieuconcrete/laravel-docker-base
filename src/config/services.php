@@ -35,4 +35,24 @@ return [
         ],
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Map Service Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Configure which map service to use for geocoding and routing.
+    | Options: 'google' or 'openstreetmap'
+    | 
+    | Google Maps: Requires API key and billing account
+    | OpenStreetMap: Free, no API key required (Nominatim + OSRM)
+    |
+    */
+
+    'map' => [
+        'provider' => env('MAP_SERVICE_PROVIDER', 'openstreetmap'),
+        'google' => [
+            'api_key' => env('GOOGLE_MAPS_API_KEY'),
+        ],
+    ],
+
 ];
