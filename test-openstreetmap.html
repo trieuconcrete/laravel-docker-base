@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test OpenStreetMap API - MIỄN PHÍ!</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .free-badge {
+            display: inline-block;
+            background: #28a745;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        .status {
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+        }
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        .test-section {
+            margin: 30px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .test-section h3 {
+            margin-top: 0;
+            color: #555;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .result {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            display: none;
+        }
+        .result.show {
+            display: block;
+        }
+        .result.success {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+        }
+        .result.error {
+            background: #f8d7da;
+            border-left: 4px solid #dc3545;
+        }
+        .api-info {
+            background: #e7f3ff;
+            padding: 15px;
+            border-left: 4px solid #007bff;
+            margin: 20px 0;
+        }
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .feature {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 3px solid #28a745;
+        }
+        .feature h4 {
+            margin: 0 0 10px 0;
+            color: #28a745;
+        }
+        code {
+            background: #fff;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+            color: #e83e8c;
+        }
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #007bff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🗺️ Test OpenStreetMap APIs</h1>
+        <span class="free-badge">✅ 100% MIỄN PHÍ - KHÔNG CẦN API KEY</span>
+        
+        <div class="api-info">
+            <strong>APIs đang sử dụng:</strong><br>
+            • <code>Nominatim</code> - Geocoding (địa chỉ → tọa độ)<br>
+            • <code>OSRM</code> - Routing & Distance (tính khoảng cách)<br>
+            • <strong>Chi phí:</strong> $0 - Hoàn toàn miễn phí!
+        </div>
+
+        <div class="features">
+            <div class="feature">
+                <h4>✅ Không cần API Key</h4>
+                <p>Không cần đăng ký, không cần billing</p>
+            </div>
+            <div class="feature">
+                <h4>✅ Không giới hạn</h4>
+                <p>Sử dụng miễn phí không giới hạn</p>
+            </div>
+            <div class="feature">
+                <h4>✅ Data chính xác</h4>
+                <p>OpenStreetMap có data tốt cho Việt Nam</p>
+            </div>
+        </div>
+
+        <!-- Test 1: Geocoding -->
+        <div class="test-section">
+            <h3>📍 Test 1: Geocoding (Nominatim API)</h3>
+            <p>Tìm tọa độ từ địa chỉ:</p>
+            <input type="text" id="geocodeInput" placeholder="Nhập địa chỉ (vd: Sân bay Đà Nẵng)">
+            <button onclick="testGeocode()">Tìm tọa độ</button>
+            <div id="geocodeResult" class="result"></div>
+        </div>
+
+        <!-- Test 2: Distance Calculation -->
+        <div class="test-section">
+            <h3>📏 Test 2: Tính khoảng cách (OSRM API)</h3>
+            <p>Tính khoảng cách giữa 2 địa điểm:</p>
+            <input type="text" id="origin" placeholder="Điểm đi (vd: Sân bay Đà Nẵng)" value="Sân bay Đà Nẵng">
+            <input type="text" id="destination" placeholder="Điểm đến (vd: Cầu Rồng Đà Nẵng)" value="Cầu Rồng Đà Nẵng">
+            <button onclick="testDistance()" id="distanceBtn">Tính khoảng cách</button>
+            <div id="distanceResult" class="result"></div>
+        </div>
+
+        <!-- Test 3: Price Calculation -->
+        <div class="test-section">
+            <h3>💰 Test 3: Tính giá (Logic từ website)</h3>
+            <p>Test logic tính giá theo bảng giá:</p>
+            <input type="number" id="testKm" placeholder="Nhập số km (vd: 10)" value="10" step="0.1">
+            <button onclick="testPriceCalculation()">Tính giá</button>
+            <div id="priceResult" class="result"></div>
+        </div>
+
+        <div class="status info">
+            💡 <strong>Lưu ý:</strong> Nominatim API có rate limit (~1 request/giây). 
+            Trên production website, nên cache kết quả hoặc dùng server riêng.
+        </div>
+    </div>
+
+    <script>
+        // Test Geocoding with Nominatim
+        async function testGeocode() {
+            const input = document.getElementById('geocodeInput');
+            const result = document.getElementById('geocodeResult');
+            const address = input.value.trim();
+            
+            if (!address) {
+                result.className = 'result show error';
+                result.innerHTML = '❌ Vui lòng nhập địa chỉ';
+                return;
+            }
+            
+            result.className = 'result show';
+            result.innerHTML = '<div class="loading"></div> Đang tìm kiếm...';
+            
+            try {
+                const response = await fetch(
+                    `https://nominatim.openstreetmap.org/search?` +
+                    `format=json&q=${encodeURIComponent(address + ', Đà Nẵng, Việt Nam')}&` +
+                    `countrycodes=vn&limit=1`,
+                    {
+                        headers: {
+                            'User-Agent': 'XeHo247DaNang-Test/1.0'
+                        }
+                    }
+                );
+                const data = await response.json();
+                
+                if (data && data.length > 0) {
+                    const place = data[0];
+                    result.className = 'result show success';
+                    result.innerHTML = `
+                        ✅ <strong>Tìm thấy!</strong><br><br>
+                        <strong>Địa chỉ đầy đủ:</strong> ${place.display_name}<br>
+                        <strong>Tọa độ:</strong> ${place.lat}, ${place.lon}<br>
+                        <strong>Type:</strong> ${place.type}
+                    `;
+                } else {
+                    result.className = 'result show error';
+                    result.innerHTML = '❌ Không tìm thấy địa chỉ này';
+                }
+            } catch (error) {
+                result.className = 'result show error';
+                result.innerHTML = `❌ Lỗi: ${error.message}`;
+            }
+        }
+        
+        // Test Distance Calculation
+        async function testDistance() {
+            const originInput = document.getElementById('origin');
+            const destInput = document.getElementById('destination');
+            const result = document.getElementById('distanceResult');
+            const button = document.getElementById('distanceBtn');
+            
+            const origin = originInput.value.trim();
+            const destination = destInput.value.trim();
+            
+            if (!origin || !destination) {
+                result.className = 'result show error';
+                result.innerHTML = '❌ Vui lòng nhập cả điểm đi và điểm đến';
+                return;
+            }
+            
+            result.className = 'result show';
+            result.innerHTML = '<div class="loading"></div> Đang tính toán (2 bước)...';
+            button.disabled = true;
+            
+            try {
+                // Step 1: Geocode origin
+                result.innerHTML = '<div class="loading"></div> Bước 1: Tìm tọa độ điểm đi...';
+                const originResponse = await fetch(
+                    `https://nominatim.openstreetmap.org/search?` +
+                    `format=json&q=${encodeURIComponent(origin + ', Đà Nẵng, Việt Nam')}&` +
+                    `countrycodes=vn&limit=1`,
+                    { headers: { 'User-Agent': 'XeHo247DaNang-Test/1.0' } }
+                );
+                const originData = await originResponse.json();
+                
+                if (!originData || originData.length === 0) {
+                    throw new Error('Không tìm thấy điểm đi');
+                }
+                
+                // Wait a bit (Nominatim rate limit)
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                // Step 2: Geocode destination
+                result.innerHTML = '<div class="loading"></div> Bước 2: Tìm tọa độ điểm đến...';
+                const destResponse = await fetch(
+                    `https://nominatim.openstreetmap.org/search?` +
+                    `format=json&q=${encodeURIComponent(destination + ', Đà Nẵng, Việt Nam')}&` +
+                    `countrycodes=vn&limit=1`,
+                    { headers: { 'User-Agent': 'XeHo247DaNang-Test/1.0' } }
+                );
+                const destData = await destResponse.json();
+                
+                if (!destData || destData.length === 0) {
+                    throw new Error('Không tìm thấy điểm đến');
+                }
+                
+                // Step 3: Calculate route with OSRM
+                result.innerHTML = '<div class="loading"></div> Bước 3: Tính khoảng cách...';
+                const originCoords = originData[0];
+                const destCoords = destData[0];
+                
+                const osrmUrl = `https://router.project-osrm.org/route/v1/driving/` +
+                    `${originCoords.lon},${originCoords.lat};${destCoords.lon},${destCoords.lat}` +
+                    `?overview=false`;
+                
+                const routeResponse = await fetch(osrmUrl);
+                const routeData = await routeResponse.json();
+                
+                if (routeData.code !== 'Ok' || !routeData.routes || routeData.routes.length === 0) {
+                    throw new Error('Không thể tính khoảng cách');
+                }
+                
+                const distance = routeData.routes[0].distance / 1000; // Convert to km
+                const duration = routeData.routes[0].duration / 60; // Convert to minutes
+                
+                // Calculate price
+                const priceInfo = calculatePrice(distance);
+                
+                result.className = 'result show success';
+                result.innerHTML = `
+                    ✅ <strong>Thành công!</strong><br><br>
+                    📍 <strong>Từ:</strong> ${originCoords.display_name}<br>
+                    📍 <strong>Đến:</strong> ${destCoords.display_name}<br><br>
+                    📏 <strong>Khoảng cách:</strong> ${distance.toFixed(1)} km<br>
+                    ⏱️ <strong>Thời gian:</strong> ~${Math.round(duration)} phút<br><br>
+                    💰 <strong>Giá ước tính:</strong> <span style="color: #28a745; font-size: 18px; font-weight: bold;">${priceInfo.message}</span><br>
+                    ${priceInfo.note ? `<small style="color: #666;">${priceInfo.note}</small>` : ''}
+                `;
+                
+            } catch (error) {
+                result.className = 'result show error';
+                result.innerHTML = `❌ <strong>Lỗi:</strong> ${error.message}`;
+            } finally {
+                button.disabled = false;
+            }
+        }
+        
+        // Test Price Calculation Logic
+        function testPriceCalculation() {
+            const kmInput = document.getElementById('testKm');
+            const result = document.getElementById('priceResult');
+            const km = parseFloat(kmInput.value);
+            
+            if (isNaN(km) || km <= 0) {
+                result.className = 'result show error';
+                result.innerHTML = '❌ Vui lòng nhập số km hợp lệ';
+                return;
+            }
+            
+            const priceInfo = calculatePrice(km);
+            
+            result.className = 'result show success';
+            result.innerHTML = `
+                ✅ <strong>Kết quả tính giá:</strong><br><br>
+                📏 <strong>Khoảng cách:</strong> ${km} km<br>
+                💰 <strong>Giá:</strong> <span style="color: #28a745; font-size: 20px; font-weight: bold;">${priceInfo.message}</span><br><br>
+                ${priceInfo.note ? `<div style="padding: 10px; background: #f8f9fa; border-radius: 5px; margin-top: 10px;"><small>${priceInfo.note}</small></div>` : ''}
+            `;
+        }
+        
+        // Price Calculation Logic (Same as website)
+        function calculatePrice(distanceKm) {
+            const currentHour = new Date().getHours();
+            const isNightTime = currentHour >= 0 && currentHour < 6;
+            const basePrice = isNightTime ? 200000 : 150000;
+            const perKmPrice = 15000;
+            
+            if (distanceKm > 30) {
+                return {
+                    price: null,
+                    message: '📞 Liên hệ hotline 0559 304 993',
+                    note: 'Khoảng cách trên 30km, vui lòng liên hệ để được báo giá chính xác'
+                };
+            } else if (distanceKm <= 5) {
+                return {
+                    price: basePrice,
+                    message: basePrice.toLocaleString('vi-VN') + 'đ',
+                    note: `Giá mở cửa (0-5km) ${isNightTime ? 'ban đêm (0h-5h59)' : 'ban ngày (6h-23h59)'}`
+                };
+            } else {
+                const price = basePrice + (distanceKm - 5) * perKmPrice;
+                return {
+                    price: price,
+                    message: price.toLocaleString('vi-VN') + 'đ',
+                    note: `${basePrice.toLocaleString('vi-VN')}đ (mở cửa) + ${((distanceKm - 5) * perKmPrice).toLocaleString('vi-VN')}đ (${(distanceKm - 5).toFixed(1)}km × 15.000đ) - ${isNightTime ? 'Ban đêm' : 'Ban ngày'}`
+                };
+            }
+        }
+        
+        // Auto-fill example on load
+        window.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('geocodeInput').value = 'Sân bay Đà Nẵng';
+        });
+    </script>
+</body>
+</html>

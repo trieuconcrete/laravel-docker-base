@@ -4,9 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Dashboard') - {{ config('app.name', 'AdminPro') }}</title>
+    <title>@yield('title', 'Dashboard') - Xế Hộ 24/7 Đà Nẵng</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -14,16 +15,22 @@
                 extend: {
                     colors: {
                         primary: {
-                            50: '#f0f9ff',
-                            100: '#e0f2fe',
-                            200: '#bae6fd',
-                            300: '#7dd3fc',
-                            400: '#38bdf8',
-                            500: '#0ea5e9',
-                            600: '#0284c7',
-                            700: '#0369a1',
-                            800: '#075985',
-                            900: '#0c4a6e',
+                            50: '#fef9e7',
+                            100: '#fdf3cf',
+                            200: '#fae69f',
+                            300: '#f8da6f',
+                            400: '#f5cd3f',
+                            500: '#C9A227',
+                            600: '#D4A84B',
+                            700: '#a58420',
+                            800: '#7d6318',
+                            900: '#544210',
+                        },
+                        dark: {
+                            DEFAULT: '#000000',
+                            secondary: '#0D0D0D',
+                            card: '#1A1A1A',
+                            gray: '#2A2A2A',
                         }
                     }
                 }
@@ -32,12 +39,42 @@
     </script>
     <style>
         [x-cloak] { display: none !important; }
+        body { font-family: 'Be Vietnam Pro', sans-serif; }
         .sidebar-transition { transition: all 0.3s ease-in-out; }
         .sidebar-gradient {
-            background: linear-gradient(135deg, rgba(30, 58, 138, 0.95) 0%, rgba(59, 130, 246, 0.95) 100%), url(https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2000) center / cover no-repeat;
+            background: 
+                linear-gradient(135deg, rgba(0, 0, 0, 0.98) 0%, rgba(13, 13, 13, 0.98) 100%),
+                url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23C9A227" fill-opacity="0.05"%3E%3Cpath d="M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');
             position: relative;
-            overflow: hidden;
-            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            border-right: 2px solid #C9A227;
+        }
+        .sidebar-gradient::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(201, 162, 39, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(201, 162, 39, 0.08) 0%, transparent 50%);
+            z-index: 0;
+            pointer-events: none;
+        }
+        /* Custom Scrollbar for Sidebar */
+        nav::-webkit-scrollbar {
+            width: 6px;
+        }
+        nav::-webkit-scrollbar-track {
+            background: #1A1A1A;
+            border-radius: 10px;
+        }
+        nav::-webkit-scrollbar-thumb {
+            background: #C9A227;
+            border-radius: 10px;
+        }
+        nav::-webkit-scrollbar-thumb:hover {
+            background: #D4A84B;
         }
     </style>
     @stack('styles')
@@ -48,15 +85,16 @@
         
         <!-- Sidebar -->
         <aside :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'" 
-               class="sidebar-gradient fixed md:static inset-y-0 left-0 z-50 w-64 from-primary-600 to-primary-700 dark:from-primary-700 dark:to-primary-800 sidebar-transition transform md:transform-none">
+               class="sidebar-gradient fixed md:static inset-y-0 left-0 z-50 w-64 sidebar-transition transform md:transform-none flex flex-col">
             
             <!-- Logo -->
-            <div class="flex items-center justify-between h-16 px-6 border-b border-primary-500/30">
+            <div class="flex items-center justify-between h-20 px-6 border-b border-primary-500/30 relative z-10 flex-shrink-0">
                 <div class="flex items-center space-x-3">
-                    <div class="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center">
-                        <i class="fas fa-cube text-white text-sm"></i>
+                    <img src="{{ asset('images/logo.jpeg') }}" alt="Xế Hộ 24/7" class="h-12 w-12 rounded-lg object-cover">
+                    <div class="flex flex-col">
+                        <span class="text-lg font-bold text-primary-500">XẾ HỘ 24/7</span>
+                        <span class="text-xs text-white/60">Admin Panel</span>
                     </div>
-                    <span class="text-xl font-bold text-white">{{ config('app.name', 'AdminPro') }}</span>
                 </div>
                 <button @click="sidebarOpen = false" class="md:hidden text-white/80 hover:text-white">
                     <i class="fas fa-times"></i>
@@ -64,7 +102,8 @@
             </div>
 
             <!-- Navigation -->
-            <nav class="flex-1 px-4 py-6 space-y-2 overflow-y-auto" x-data="{ activeMenu: '{{ request()->is('admin/cms/*') ? 'cms' : (request()->is('admin/crm/*') ? 'crm' : (request()->is('admin/products*') || request()->is('admin/orders*') || request()->is('admin/customers*') || request()->is('admin/inventory*') || request()->is('admin/analytics*') ? 'ecommerce' : (request()->is('admin/jobs/*') ? 'jobs' : (request()->is('admin/users*') ? 'users' : '')))) }}' }">
+            <nav class="flex-1 px-4 py-6 space-y-2 overflow-y-auto relative z-10" x-data="{ activeMenu: '{{ request()->is('admin/cms/*') ? 'cms' : (request()->is('admin/crm/*') ? 'crm' : (request()->is('admin/products*') || request()->is('admin/orders*') || request()->is('admin/customers*') || request()->is('admin/inventory*') || request()->is('admin/analytics*') ? 'ecommerce' : (request()->is('admin/jobs/*') ? 'jobs' : (request()->is('admin/users*') ? 'users' : '')))) }}' }}"
+                 style="scrollbar-width: thin; scrollbar-color: #C9A227 #1A1A1A;">
                 @include('partials.sidebar-menu')
             </nav>
         </aside>
@@ -79,13 +118,15 @@
                         <i class="fas fa-bars text-xl"></i>
                     </button>
                     
-                    <!-- Search -->
+                    <!-- Homepage Link -->
                     <div class="hidden md:flex items-center">
-                        <div class="relative">
-                            <input type="text" placeholder="Tìm kiếm..." 
-                                   class="w-64 pl-10 pr-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 dark:text-gray-200">
-                            <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                        </div>
+                        <a href="{{ route('home') }}" target="_blank" 
+                           class="flex items-center space-x-2 px-4 py-2 rounded-lg transition-all hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200"
+                           title="Xem trang chủ website">
+                            <i class="fas fa-home" style="color: #C9A227;"></i>
+                            <span class="text-sm font-medium">Trang chủ</span>
+                            <i class="fas fa-external-link-alt text-xs text-gray-400"></i>
+                        </a>
                     </div>
                 </div>
 
@@ -187,12 +228,12 @@
                         const linkPath = new URL(link.href).pathname;
                         
                         // Remove active classes first
-                        link.classList.remove('bg-white/20', 'backdrop-blur-sm', 'text-white');
+                        link.classList.remove('bg-primary-500/20', 'backdrop-blur-sm', 'text-primary-500');
                         
                         // Add active class if paths match
                         if (currentPath === linkPath) {
-                            link.classList.add('bg-white/20', 'backdrop-blur-sm', 'text-white');
-                        } else if (!link.classList.contains('text-white')) {
+                            link.classList.add('bg-primary-500/20', 'backdrop-blur-sm', 'text-primary-500');
+                        } else if (!link.classList.contains('text-primary-500')) {
                             link.classList.add('text-white/70');
                         }
                     });
@@ -215,7 +256,7 @@ autoExpandActiveMenu() {
                         if (currentPath.includes('/admin/cms/')) {
                             if (button.textContent.includes('CMS')) {
                                 button.classList.remove('text-white/70');
-                                button.classList.add('bg-white/20', 'backdrop-blur-sm', 'text-white');
+                                button.classList.add('bg-primary-500/20', 'backdrop-blur-sm', 'text-primary-500');
                                 Alpine.evaluate(parentDiv, 'open = true');
                             }
                         }
@@ -224,7 +265,7 @@ autoExpandActiveMenu() {
                         if (currentPath.includes('/admin/crm/')) {
                             if (button.textContent.includes('CRM')) {
                                 button.classList.remove('text-white/70');
-                                button.classList.add('bg-white/20', 'backdrop-blur-sm', 'text-white');
+                                button.classList.add('bg-primary-500/20', 'backdrop-blur-sm', 'text-primary-500');
                                 Alpine.evaluate(parentDiv, 'open = true');
                             }
                         }
@@ -237,7 +278,7 @@ autoExpandActiveMenu() {
                             currentPath.includes('/admin/analytics')) {
                             if (button.textContent.includes('E-commerce')) {
                                 button.classList.remove('text-white/70');
-                                button.classList.add('bg-white/20', 'backdrop-blur-sm', 'text-white');
+                                button.classList.add('bg-primary-500/20', 'backdrop-blur-sm', 'text-primary-500');
                                 Alpine.evaluate(parentDiv, 'open = true');
                             }
                         }
@@ -246,7 +287,7 @@ autoExpandActiveMenu() {
                         if (currentPath.includes('/admin/jobs/')) {
                             if (button.textContent.includes('Job Portal')) {
                                 button.classList.remove('text-white/70');
-                                button.classList.add('bg-white/20', 'backdrop-blur-sm', 'text-white');
+                                button.classList.add('bg-primary-500/20', 'backdrop-blur-sm', 'text-primary-500');
                                 Alpine.evaluate(parentDiv, 'open = true');
                             }
                         }
@@ -255,7 +296,7 @@ autoExpandActiveMenu() {
                         if (currentPath.includes('/admin/users/')) {
                             if (button.textContent.includes('Users')) {
                                 button.classList.remove('text-white/70');
-                                button.classList.add('bg-white/20', 'backdrop-blur-sm', 'text-white');
+                                button.classList.add('bg-primary-500/20', 'backdrop-blur-sm', 'text-primary-500');
                                 Alpine.evaluate(parentDiv, 'open = true');
                             }
                         }
@@ -274,7 +315,7 @@ autoExpandActiveMenu() {
                 const linkPath = new URL(link.href).pathname;
                 if (currentPath === linkPath) {
                     link.classList.remove('text-white/60');
-                    link.classList.add('text-white', 'font-semibold');
+                    link.classList.add('text-primary-400', 'font-semibold');
                 }
             });
         });
