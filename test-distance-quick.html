@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Quick Test Distance Matrix API</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .result {
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test Distance Matrix API</h1>
+    
+    <p><strong>API Key:</strong> <code id="apiKey">Loading...</code></p>
+    
+    <button onclick="testDistance()">Click để Test Distance Matrix API</button>
+    
+    <div id="result"></div>
+
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAsge53SQbz9daHn50tcgngIAVUjhDEFxQ&libraries=places"></script>
+    <script>
+        document.getElementById('apiKey').textContent = 'AIzaSyAsge53SQbz9daHn50tcgngIAVUjhDEFxQ';
+        
+        function testDistance() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<div class="result">⏳ Đang test...</div>';
+            
+            if (typeof google === 'undefined' || !google.maps) {
+                resultDiv.innerHTML = '<div class="result error">❌ Google Maps API không load được. Kiểm tra API key.</div>';
+                return;
+            }
+            
+            const service = new google.maps.DistanceMatrixService();
+            
+            service.getDistanceMatrix({
+                origins: ['Sân bay Đà Nẵng'],
+                destinations: ['Cầu Rồng Đà Nẵng'],
+                travelMode: 'DRIVING',
+                unitSystem: google.maps.UnitSystem.METRIC
+            }, function(response, status) {
+                console.log('Status:', status);
+                console.log('Response:', response);
+                
+                if (status === 'OK') {
+                    const element = response.rows[0].elements[0];
+                    if (element.status === 'OK') {
+                        const distance = element.distance.text;
+                        const duration = element.duration.text;
+                        resultDiv.innerHTML = `
+                            <div class="result success">
+                                <h3>✅ THÀNH CÔNG!</h3>
+                                <p><strong>Distance Matrix API hoạt động tốt!</strong></p>
+                                <p>📍 Khoảng cách: ${distance}</p>
+                                <p>⏱️ Thời gian: ${duration}</p>
+                            </div>
+                        `;
+                    } else {
+                        resultDiv.innerHTML = `
+                            <div class="result error">
+                                <h3>❌ LỖI</h3>
+                                <p>Element Status: ${element.status}</p>
+                                <p>Không tìm thấy route giữa 2 địa điểm</p>
+                            </div>
+                        `;
+                    }
+                } else {
+                    let errorMsg = '';
+                    switch(status) {
+                        case 'REQUEST_DENIED':
+                            errorMsg = `
+                                <strong>REQUEST_DENIED</strong><br><br>
+                                ❌ API chưa được enable HOẶC API key bị restrict<br><br>
+                                <strong>Giải pháp:</strong><br>
+                                1. Vào https://console.cloud.google.com/apis/credentials<br>
+                                2. Click vào API key<br>
+                                3. Set "Application restrictions" = "None"<br>
+                                4. Set "API restrictions" = "Don't restrict key"<br>
+                                5. Save và đợi 1-2 phút<br><br>
+                                <strong>Hoặc:</strong><br>
+                                - Enable Distance Matrix API: https://console.cloud.google.com/apis/library/distance-matrix-backend.googleapis.com<br>
+                                - Setup Billing: https://console.cloud.google.com/billing (BẮT BUỘC)
+                            `;
+                            break;
+                        case 'OVER_QUERY_LIMIT':
+                            errorMsg = 'Vượt quá giới hạn queries. Kiểm tra billing account.';
+                            break;
+                        case 'INVALID_REQUEST':
+                            errorMsg = 'Request không hợp lệ. Kiểm tra parameters.';
+                            break;
+                        default:
+                            errorMsg = 'Lỗi: ' + status;
+                    }
+                    
+                    resultDiv.innerHTML = `
+                        <div class="result error">
+                            <h3>❌ LỖI API</h3>
+                            <p>${errorMsg}</p>
+                        </div>
+                    `;
+                }
+            });
+        }
+        
+        // Auto test on load
+        window.onload = function() {
+            if (typeof google !== 'undefined' && google.maps) {
+                console.log('✅ Google Maps loaded');
+            } else {
+                document.getElementById('result').innerHTML = '<div class="result error">❌ Google Maps không load được</div>';
+            }
+        };
+    </script>
+</body>
+</html>

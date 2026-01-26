@@ -8,8 +8,22 @@
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <!-- OpenStreetMap & Leaflet for maps (optional, only if needed for display) -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- Google Maps API with Places Library -->
+    <script>
+        // Define callback function before loading Google Maps
+        function initMap() {
+            console.log('✅ Google Maps API loaded successfully');
+            console.log('API Key used:', '{{ config('services.map.google.api_key') }}');
+        }
+        
+        // Log any Google Maps errors
+        window.gm_authFailure = function() {
+            console.error('❌ Google Maps Authentication Failed!');
+            console.error('API Key:', '{{ config('services.map.google.api_key') }}');
+            console.error('Check: 1) API key is correct, 2) APIs are enabled, 3) Billing is active');
+        };
+    </script>
+    <script src="https://maps.googleapis.com/maps/api/js?key={{ config('services.map.google.api_key') }}&libraries=places&language=vi&region=VN&callback=initMap" async defer></script>
     <style>
         :root {
             --bg-dark: #000000;
@@ -1422,6 +1436,59 @@
             margin-right: 8px;
             color: var(--gold);
         }
+
+        /* Google Places Autocomplete Styling */
+        .pac-container {
+            background: var(--bg-card) !important;
+            border: 1px solid var(--gold) !important;
+            border-radius: 8px !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+            font-family: 'Be Vietnam Pro', sans-serif !important;
+            margin-top: 2px !important;
+            z-index: 10000 !important;
+        }
+
+        .pac-container:after {
+            display: none !important;
+        }
+
+        .pac-item {
+            background: var(--bg-card) !important;
+            border-top: 1px solid var(--white-20) !important;
+            padding: 12px 15px !important;
+            cursor: pointer !important;
+            color: var(--white-80) !important;
+            font-size: 14px !important;
+            line-height: 1.4 !important;
+        }
+
+        .pac-item:first-child {
+            border-top: none !important;
+        }
+
+        .pac-item:hover,
+        .pac-item-selected {
+            background: rgba(201, 162, 39, 0.2) !important;
+        }
+
+        .pac-item-query {
+            color: var(--gold) !important;
+            font-size: 14px !important;
+            font-weight: 600 !important;
+        }
+
+        .pac-matched {
+            color: var(--gold-light) !important;
+            font-weight: 700 !important;
+        }
+
+        .pac-icon {
+            display: none !important;
+        }
+
+        .pac-item-query .pac-matched {
+            color: var(--gold-hover) !important;
+        }
     </style>
 </head>
 <body>
@@ -2032,196 +2099,62 @@
             }
         });
 
-        // OpenStreetMap + Nominatim + OSRM - Hoàn toàn MIỄN PHÍ!
+        // Google Maps API Integration
         let calculateTimeout = null;
-        let autocompleteTimeout = null;
-        let autocompleteCache = {};
-        let currentFocusedIndex = -1;
+        let pickupAutocomplete = null;
+        let dropoffAutocomplete = null;
+        let distanceMatrixService = null;
         
-        // Initialize Address Autocomplete using Nominatim
+        // Initialize Google Places Autocomplete
         function initAutocomplete() {
+            // Wait for Google Maps API to load
+            if (typeof google === 'undefined' || !google.maps) {
+                setTimeout(initAutocomplete, 100);
+                return;
+            }
+            
             const pickupInput = document.getElementById('pickup_location');
             const dropoffInput = document.getElementById('dropoff_location');
             
             if (pickupInput && dropoffInput) {
-                // Wrap inputs in autocomplete wrapper
-                wrapInputWithAutocomplete(pickupInput);
-                wrapInputWithAutocomplete(dropoffInput);
+                // Initialize Distance Matrix Service
+                distanceMatrixService = new google.maps.DistanceMatrixService();
                 
-                // Setup autocomplete for pickup
-                setupAddressAutocomplete(pickupInput);
-                // Setup autocomplete for dropoff
-                setupAddressAutocomplete(dropoffInput);
+                // Setup Google Places Autocomplete for both inputs
+                // Restrict to Vietnam and Da Nang area
+                const options = {
+                    componentRestrictions: { country: 'vn' },
+                    fields: ['formatted_address', 'geometry', 'name'],
+                    types: ['geocode', 'establishment']
+                };
                 
-                // Calculate distance when both locations are filled
-                dropoffInput.addEventListener('input', function() {
+                pickupAutocomplete = new google.maps.places.Autocomplete(pickupInput, options);
+                dropoffAutocomplete = new google.maps.places.Autocomplete(dropoffInput, options);
+                
+                // Listen for place selection
+                pickupAutocomplete.addListener('place_changed', function() {
                     clearTimeout(calculateTimeout);
-                    calculateTimeout = setTimeout(() => {
-                        calculateDistanceAndPrice();
-                    }, 1500);
+                    calculateTimeout = setTimeout(calculateDistanceAndPrice, 500);
                 });
                 
+                dropoffAutocomplete.addListener('place_changed', function() {
+                    clearTimeout(calculateTimeout);
+                    calculateTimeout = setTimeout(calculateDistanceAndPrice, 500);
+                });
+                
+                // Also trigger on manual input (with debounce)
                 pickupInput.addEventListener('input', function() {
                     clearTimeout(calculateTimeout);
-                    calculateTimeout = setTimeout(() => {
-                        calculateDistanceAndPrice();
-                    }, 1500);
+                    calculateTimeout = setTimeout(calculateDistanceAndPrice, 1500);
+                });
+                
+                dropoffInput.addEventListener('input', function() {
+                    clearTimeout(calculateTimeout);
+                    calculateTimeout = setTimeout(calculateDistanceAndPrice, 1500);
                 });
             }
         }
-        
-        // Wrap input with autocomplete wrapper
-        function wrapInputWithAutocomplete(input) {
-            const wrapper = input.closest('.input-wrapper');
-            if (!wrapper.classList.contains('autocomplete-wrapper')) {
-                wrapper.classList.add('autocomplete-wrapper');
-                
-                // Create dropdown
-                const dropdown = document.createElement('div');
-                dropdown.className = 'autocomplete-dropdown';
-                dropdown.id = input.id + '_dropdown';
-                wrapper.appendChild(dropdown);
-                
-                // Close dropdown when clicking outside
-                document.addEventListener('click', function(e) {
-                    if (!wrapper.contains(e.target)) {
-                        dropdown.classList.remove('show');
-                    }
-                });
-            }
-        }
-        
-        // Setup autocomplete for an input using Nominatim API
-        function setupAddressAutocomplete(input) {
-            const dropdown = document.getElementById(input.id + '_dropdown');
-            let suggestions = [];
-            
-            // Input event
-            input.addEventListener('input', async function() {
-                const query = this.value.trim();
-                clearTimeout(autocompleteTimeout);
-                currentFocusedIndex = -1;
-                
-                if (query.length < 3) {
-                    dropdown.classList.remove('show');
-                    return;
-                }
-                
-                // Show loading
-                dropdown.innerHTML = '<div class="autocomplete-loading">🔍 Đang tìm kiếm...</div>';
-                dropdown.classList.add('show');
-                
-                autocompleteTimeout = setTimeout(async () => {
-                    try {
-                        // Check cache
-                        const cacheKey = query.toLowerCase();
-                        if (autocompleteCache[cacheKey]) {
-                            suggestions = autocompleteCache[cacheKey];
-                            displaySuggestions(dropdown, suggestions, input);
-                            return;
-                        }
-                        
-                        // Nominatim search with Vietnam bounds and Da Nang priority
-                        const response = await fetch(
-                            `https://nominatim.openstreetmap.org/search?` +
-                            `format=json&q=${encodeURIComponent(query + ', Đà Nẵng')}&` +
-                            `countrycodes=vn&` +
-                            `limit=8&` +
-                            `addressdetails=1`,
-                            {
-                                headers: {
-                                    'User-Agent': 'XeHo247DaNang/1.0'
-                                }
-                            }
-                        );
-                        const data = await response.json();
-                        
-                        if (data && data.length > 0) {
-                            suggestions = data;
-                            autocompleteCache[cacheKey] = data; // Cache results
-                            displaySuggestions(dropdown, suggestions, input);
-                        } else {
-                            dropdown.innerHTML = '<div class="autocomplete-no-results">❌ Không tìm thấy địa chỉ</div>';
-                        }
-                    } catch (error) {
-                        console.log('Autocomplete error:', error);
-                        dropdown.innerHTML = '<div class="autocomplete-no-results">⚠️ Lỗi kết nối</div>';
-                    }
-                }, 500);
-            });
-            
-            // Keyboard navigation
-            input.addEventListener('keydown', function(e) {
-                const items = dropdown.querySelectorAll('.autocomplete-item');
-                
-                if (e.key === 'ArrowDown') {
-                    e.preventDefault();
-                    currentFocusedIndex = (currentFocusedIndex + 1) % items.length;
-                    updateActiveItem(items);
-                } else if (e.key === 'ArrowUp') {
-                    e.preventDefault();
-                    currentFocusedIndex = currentFocusedIndex <= 0 ? items.length - 1 : currentFocusedIndex - 1;
-                    updateActiveItem(items);
-                } else if (e.key === 'Enter') {
-                    e.preventDefault();
-                    if (currentFocusedIndex >= 0 && items[currentFocusedIndex]) {
-                        items[currentFocusedIndex].click();
-                    }
-                } else if (e.key === 'Escape') {
-                    dropdown.classList.remove('show');
-                }
-            });
-        }
-        
-        // Display suggestions in dropdown
-        function displaySuggestions(dropdown, suggestions, input) {
-            dropdown.innerHTML = '';
-            
-            suggestions.forEach((place, index) => {
-                const item = document.createElement('div');
-                item.className = 'autocomplete-item';
-                
-                // Extract name and address
-                const name = place.name || place.display_name.split(',')[0];
-                const address = place.display_name;
-                
-                item.innerHTML = `
-                    <div class="item-name">📍 ${name}</div>
-                    <div class="item-address">${address}</div>
-                `;
-                
-                // Store coordinates
-                item.dataset.lat = place.lat;
-                item.dataset.lon = place.lon;
-                item.dataset.address = address;
-                
-                // Click event
-                item.addEventListener('click', function() {
-                    input.value = address;
-                    dropdown.classList.remove('show');
-                    currentFocusedIndex = -1;
-                    
-                    // Trigger distance calculation
-                    input.dispatchEvent(new Event('input'));
-                });
-                
-                dropdown.appendChild(item);
-            });
-            
-            dropdown.classList.add('show');
-        }
-        
-        // Update active item in keyboard navigation
-        function updateActiveItem(items) {
-            items.forEach((item, index) => {
-                item.classList.toggle('active', index === currentFocusedIndex);
-            });
-            
-            // Scroll to active item
-            if (items[currentFocusedIndex]) {
-                items[currentFocusedIndex].scrollIntoView({ block: 'nearest' });
-            }
-        }
+
         
         // Calculate price based on distance
         function calculatePrice(distanceKm) {
@@ -2258,39 +2191,24 @@
             };
         }
         
-        // Geocode address to coordinates using Nominatim
-        async function geocodeAddress(address) {
-            try {
-                const response = await fetch(
-                    `https://nominatim.openstreetmap.org/search?` +
-                    `format=json&q=${encodeURIComponent(address)}&` +
-                    `countrycodes=vn&` +
-                    `limit=1`,
-                    {
-                        headers: {
-                            'User-Agent': 'XeHo247DaNang/1.0'
-                        }
-                    }
-                );
-                const data = await response.json();
-                
-                if (data && data.length > 0) {
-                    return {
-                        lat: parseFloat(data[0].lat),
-                        lon: parseFloat(data[0].lon)
-                    };
-                }
-                return null;
-            } catch (error) {
-                console.error('Geocoding error:', error);
-                return null;
-            }
-        }
-        
-        // Calculate distance using OSRM (Open Source Routing Machine)
+        // Calculate distance using Google Distance Matrix API
         async function calculateDistanceAndPrice() {
+            console.log('🔍 calculateDistanceAndPrice called');
+            
+            // Wait for Google Maps API to load
+            if (typeof google === 'undefined' || !google.maps || !distanceMatrixService) {
+                console.warn('⚠️ Google Maps not ready yet. google:', typeof google, 'distanceMatrixService:', distanceMatrixService);
+                return;
+            }
+            
+            console.log('✅ Google Maps ready, distanceMatrixService initialized');
+            
             const pickupLocation = document.getElementById('pickup_location').value.trim();
             const dropoffLocation = document.getElementById('dropoff_location').value.trim();
+            
+            console.log('📍 Pickup:', pickupLocation);
+            console.log('📍 Dropoff:', dropoffLocation);
+            
             const infoContainer = document.getElementById('distancePriceInfo');
             const loadingInfo = document.getElementById('loadingInfo');
             const resultInfo = document.getElementById('resultInfo');
@@ -2311,74 +2229,104 @@
             resultInfo.style.display = 'none';
             errorInfo.style.display = 'none';
             
-            try {
-                // Step 1: Geocode both addresses
-                const pickupCoords = await geocodeAddress(pickupLocation + ', Đà Nẵng, Việt Nam');
-                const dropoffCoords = await geocodeAddress(dropoffLocation + ', Đà Nẵng, Việt Nam');
-                
-                if (!pickupCoords || !dropoffCoords) {
-                    throw new Error('Không tìm thấy địa chỉ');
+            console.log('🚀 Calling Distance Matrix API...');
+            
+            // Use Google Distance Matrix API
+            distanceMatrixService.getDistanceMatrix(
+                {
+                    origins: [pickupLocation + ', Đà Nẵng, Việt Nam'],
+                    destinations: [dropoffLocation + ', Đà Nẵng, Việt Nam'],
+                    travelMode: google.maps.TravelMode.DRIVING,
+                    unitSystem: google.maps.UnitSystem.METRIC,
+                    avoidHighways: false,
+                    avoidTolls: false
+                },
+                function(response, status) {
+                    console.log('📡 Distance Matrix Response - Status:', status);
+                    console.log('📡 Response:', response);
+                    
+                    loadingInfo.style.display = 'none';
+                    
+                    if (status === 'OK' && response.rows[0].elements[0].status === 'OK') {
+                        try {
+                            // Get distance in meters and convert to km
+                            const distanceMeters = response.rows[0].elements[0].distance.value;
+                            const distanceKm = distanceMeters / 1000;
+                            const distanceText = distanceKm.toFixed(1) + ' km';
+                            
+                            // Calculate price
+                            const priceInfo = calculatePrice(distanceKm);
+                            
+                            // Display results
+                            distanceValue.textContent = distanceText;
+                            
+                            // Set hidden field values for form submission
+                            document.getElementById('distance_hidden').value = distanceKm.toFixed(2);
+                            
+                            if (priceInfo.price === null) {
+                                // Over 30km case - don't set price
+                                document.getElementById('price_hidden').value = '';
+                                priceValue.textContent = priceInfo.message;
+                                priceValue.style.fontSize = '14px';
+                                priceNote.textContent = priceInfo.note;
+                                priceNote.style.display = 'block';
+                                priceNote.style.background = 'rgba(230, 57, 70, 0.2)';
+                                priceNote.style.color = 'var(--red-light)';
+                            } else {
+                                // Set price for form submission
+                                document.getElementById('price_hidden').value = priceInfo.price;
+                                priceValue.textContent = priceInfo.message;
+                                priceValue.style.fontSize = '18px';
+                                priceNote.textContent = priceInfo.note;
+                                priceNote.style.display = 'block';
+                                priceNote.style.background = 'var(--bg-card)';
+                                priceNote.style.color = 'var(--white-60)';
+                            }
+                            
+                            resultInfo.style.display = 'block';
+                        } catch (error) {
+                            errorInfo.textContent = '❌ Lỗi xử lý dữ liệu: ' + error.message;
+                            errorInfo.style.display = 'block';
+                        }
+                    } else {
+                        let errorMessage = 'Không thể tính khoảng cách. ';
+                        
+                        if (status === 'OVER_QUERY_LIMIT') {
+                            errorMessage += 'Đã vượt quá giới hạn truy vấn API.';
+                        } else if (status === 'REQUEST_DENIED') {
+                            errorMessage += 'API key không hợp lệ hoặc chưa được enable.';
+                        } else if (status === 'INVALID_REQUEST') {
+                            errorMessage += 'Yêu cầu không hợp lệ.';
+                        } else if (response.rows[0].elements[0].status === 'ZERO_RESULTS') {
+                            errorMessage += 'Không tìm thấy đường đi giữa hai địa điểm.';
+                        } else if (response.rows[0].elements[0].status === 'NOT_FOUND') {
+                            errorMessage += 'Không tìm thấy địa chỉ. Vui lòng kiểm tra lại.';
+                        } else {
+                            errorMessage += 'Vui lòng thử lại sau.';
+                        }
+                        
+                        errorInfo.textContent = '❌ ' + errorMessage;
+                        errorInfo.style.display = 'block';
+                    }
                 }
-                
-                // Step 2: Calculate route using OSRM
-                const osrmUrl = `https://router.project-osrm.org/route/v1/driving/` +
-                    `${pickupCoords.lon},${pickupCoords.lat};${dropoffCoords.lon},${dropoffCoords.lat}` +
-                    `?overview=false&alternatives=false&steps=false`;
-                
-                const routeResponse = await fetch(osrmUrl);
-                const routeData = await routeResponse.json();
-                
-                if (routeData.code !== 'Ok' || !routeData.routes || routeData.routes.length === 0) {
-                    throw new Error('Không thể tính khoảng cách');
-                }
-                
-                // Get distance in meters, convert to km
-                const distanceMeters = routeData.routes[0].distance;
-                const distanceKm = distanceMeters / 1000;
-                const distanceText = distanceKm.toFixed(1) + ' km';
-                
-                loadingInfo.style.display = 'none';
-                
-                // Calculate price
-                const priceInfo = calculatePrice(distanceKm);
-                
-                // Display results
-                distanceValue.textContent = distanceText;
-                
-                // Set hidden field values for form submission
-                document.getElementById('distance_hidden').value = distanceKm.toFixed(2);
-                
-                if (priceInfo.price === null) {
-                    // Over 30km case - don't set price
-                    document.getElementById('price_hidden').value = '';
-                    priceValue.textContent = priceInfo.message;
-                    priceValue.style.fontSize = '14px';
-                    priceNote.textContent = priceInfo.note;
-                    priceNote.style.display = 'block';
-                    priceNote.style.background = 'rgba(230, 57, 70, 0.2)';
-                    priceNote.style.color = 'var(--red-light)';
-                } else {
-                    // Set price for form submission
-                    document.getElementById('price_hidden').value = priceInfo.price;
-                    priceValue.textContent = priceInfo.message;
-                    priceValue.style.fontSize = '18px';
-                    priceNote.textContent = priceInfo.note;
-                    priceNote.style.display = 'block';
-                    priceNote.style.background = 'var(--bg-card)';
-                    priceNote.style.color = 'var(--white-60)';
-                }
-                
-                resultInfo.style.display = 'block';
-                
-            } catch (error) {
-                loadingInfo.style.display = 'none';
-                errorInfo.textContent = '❌ ' + (error.message || 'Không thể tính khoảng cách. Vui lòng kiểm tra lại địa chỉ.');
-                errorInfo.style.display = 'block';
+            );
+        }
+        
+        // Initialize when page loads - wait for Google Maps API
+        function startInit() {
+            if (typeof google !== 'undefined' && google.maps) {
+                initAutocomplete();
+            } else {
+                setTimeout(startInit, 100);
             }
         }
         
-        // Initialize when page loads
-        window.addEventListener('DOMContentLoaded', initAutocomplete);
+        // Start initialization when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', startInit);
+        } else {
+            startInit();
+        }
 
         // Check if page was just loaded after form submission
         window.addEventListener('DOMContentLoaded', function() {
