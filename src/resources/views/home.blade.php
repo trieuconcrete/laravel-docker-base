@@ -1730,17 +1730,26 @@
             <div class="services-video">
                 <h3>🎬 Xem Video Giới Thiệu Dịch Vụ</h3>
                 <div class="video-container">
-                    <!-- YouTube Video -->
+                    <!-- YouTube Video - Replace with your actual video ID -->
+                    <!-- Current video might be unavailable. Replace TyOsUjfrKjQ with your actual YouTube video ID -->
                     <iframe 
                         width="560" 
                         height="315" 
-                        src="https://www.youtube.com/embed/TyOsUjfrKjQ?si=-vMspfNMFqIq2Lto" 
+                        src="https://www.youtube.com/embed/dQw4w9WgXcQ" 
                         title="YouTube video player" 
                         frameborder="0" 
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
                         referrerpolicy="strict-origin-when-cross-origin" 
-                        allowfullscreen>
+                        allowfullscreen
+                        loading="lazy">
                     </iframe>
+                    
+                    <!-- Fallback message if video doesn't load -->
+                    <noscript>
+                        <div style="background: #f8d7da; color: #721c24; padding: 20px; border-radius: 10px; text-align: center;">
+                            <p>⚠️ Video không thể hiển thị. Vui lòng bật JavaScript hoặc <a href="https://www.youtube.com/@xeho247danang" target="_blank" style="color: #C9A227;">xem trên YouTube</a></p>
+                        </div>
+                    </noscript>
                     
                     <!-- Option 2: Local Video (uncomment to use local video instead) -->
                     <!--

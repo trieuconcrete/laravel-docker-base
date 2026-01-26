@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\DriverBooking;
+use App\Mail\BookingNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Mail;
 
 class DriverBookingController extends Controller
 {
@@ -48,8 +50,14 @@ class DriverBookingController extends Controller
             'booking_date' => now(),
         ]);
 
-        // TODO: Send email notification to admin
-        // TODO: Send SMS confirmation to customer
+        // Send email notification to admin
+        try {
+            $adminEmail = config('mail.admin_email', 'admin@xeho247danang.vn');
+            Mail::to($adminEmail)->send(new BookingNotification($booking));
+        } catch (\Exception $e) {
+            // Log error but don't fail the booking
+            \Log::error('Failed to send booking notification email: ' . $e->getMessage());
+        }
 
         return redirect()->back()->with('success', 'Cảm ơn bạn đã đặt xe! Chúng tôi sẽ liên hệ lại trong vòng 5 phút.');
     }

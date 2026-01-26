@@ -115,4 +115,15 @@ return [
         'name' => env('MAIL_FROM_NAME', 'Example'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Admin Email Address
+    |--------------------------------------------------------------------------
+    |
+    | Email address to receive booking notifications
+    |
+    */
+
+    'admin_email' => env('ADMIN_EMAIL', 'admin@xeho247danang.vn'),
+
 ];
