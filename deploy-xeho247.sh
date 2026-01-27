@@ -29,7 +29,7 @@ REPO_BRANCH="project/xeho247danang"
 PHP_VERSION="8.2"
 
 # SSH command wrapper with auto password
-SSH_CMD="sshpass -p '${SSH_PASSWORD}' ssh -o StrictHostKeyChecking=no"
+SSH_CMD="sshpass -p ${SSH_PASSWORD} ssh -o StrictHostKeyChecking=no -o PreferredAuthentications=password -o PubkeyAuthentication=no"
 
 # Functions
 
