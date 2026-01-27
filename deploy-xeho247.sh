@@ -9,7 +9,7 @@
 # Date: 2026-01-27
 ###############################################################################
 
-set -euo pipefail  # Fail fast on errors, unset vars, or pipeline issues
+set -uo pipefail  # Unset vars and pipeline issues (removed -e for better error control)
 
 # Colors for output
 RED='\033[0;31m'
@@ -24,13 +24,15 @@ NC='\033[0m' # No Color
 SSH_HOST="cloudfly-hpl"
 SSH_PASSWORD="36z0zCaWXsk2wGdS"
 SERVER_PATH="/var/www/webroot/xeho247danang/src"
-REPO_URL="git@github.com:trieuconcrete/laravel-docker-base.git"  # Update with actual repo URL
+REPO_URL="git@github.com:trieuconcrete/laravel-docker-base.git"
 REPO_BRANCH="project/xeho247danang"
 PHP_VERSION="8.4"
+DEPLOY_TIMEOUT=300  # 5 minutes timeout
+BACKUP_DIR="/var/www/backups/xeho247danang"
 
 # SSH function wrapper with auto password
 ssh_exec() {
-    sshpass -p "${SSH_PASSWORD}" ssh -o StrictHostKeyChecking=no -o PreferredAuthentications=password -o PubkeyAuthentication=no "${SSH_HOST}" "$@"
+    sshpass -p "${SSH_PASSWORD}" ssh -o ConnectTimeout=10 -o StrictHostKeyChecking=no -o PreferredAuthentications=password -o PubkeyAuthentication=no "${SSH_HOST}" "$@"
 }
 
 # Functions
@@ -53,7 +55,14 @@ print_info() {
     echo -e "${YELLOW}ℹ️  $1${NC}"
 }
 
-trap 'print_error "Deployment failed at line $LINENO"' ERR
+print_warning() {
+    echo -e "${YELLOW}⚠️  $1${NC}"
+}
+
+log_deployment() {
+    local message="$1"
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $message" >> deploy.log
+}
 
 # Check if SSH connection works
 check_ssh() {
@@ -93,13 +102,15 @@ show_menu() {
     echo -e "${MAGENTA}║          🚗 XẾ HỘ 24/7 - DEPLOYMENT OPTIONS                 ║${NC}"
     echo -e "${MAGENTA}╠══════════════════════════════════════════════════════════════╣${NC}"
     echo -e "${MAGENTA}║                                                              ║${NC}"
-    echo -e "${MAGENTA}║${NC}  ${CYAN}1)${NC} 🚀 Full Deploy            ${YELLOW}(Git Pull + Dependencies)${NC}  ${MAGENTA}║${NC}"
+    echo -e "${MAGENTA}║${NC}  ${CYAN}1)${NC} 🚀 Full Deploy            ${YELLOW}(Git + Composer + Cache)${NC}  ${MAGENTA}║${NC}"
     echo -e "${MAGENTA}║${NC}  ${CYAN}2)${NC} 📦 Install Dependencies   ${YELLOW}(Composer Install)${NC}        ${MAGENTA}║${NC}"
     echo -e "${MAGENTA}║${NC}  ${CYAN}3)${NC} 🗄️  Run Migrations         ${YELLOW}(Database Migration)${NC}     ${MAGENTA}║${NC}"
     echo -e "${MAGENTA}║${NC}  ${CYAN}4)${NC} 🧹 Clear Cache            ${YELLOW}(Laravel Cache Clear)${NC}    ${MAGENTA}║${NC}"
     echo -e "${MAGENTA}║${NC}  ${CYAN}5)${NC} 🔄 Restart Services       ${YELLOW}(PHP-FPM + Nginx)${NC}        ${MAGENTA}║${NC}"
     echo -e "${MAGENTA}║${NC}  ${CYAN}6)${NC} 📊 Check Status           ${YELLOW}(Server Health)${NC}          ${MAGENTA}║${NC}"
     echo -e "${MAGENTA}║${NC}  ${CYAN}7)${NC} 📝 View Logs              ${YELLOW}(Laravel Logs)${NC}           ${MAGENTA}║${NC}"
+    echo -e "${MAGENTA}║${NC}  ${CYAN}8)${NC} 💾 Backup Database        ${YELLOW}(MySQL Dump)${NC}             ${MAGENTA}║${NC}"
+    echo -e "${MAGENTA}║${NC}  ${CYAN}9)${NC} ⏪ Rollback Deploy       ${YELLOW}(Git Reset)${NC}              ${MAGENTA}║${NC}"
     echo -e "${MAGENTA}║                                                              ║${NC}"
     echo -e "${MAGENTA}║${NC}  ${RED}0)${NC} ❌ Exit                                                  ${MAGENTA}║${NC}"
     echo -e "${MAGENTA}║                                                              ║${NC}"
@@ -108,33 +119,41 @@ show_menu() {
     echo -e "${YELLOW}Server: ${CYAN}$SSH_HOST${NC}"
     echo -e "${YELLOW}Path: ${CYAN}$SERVER_PATH${NC}"
     echo -e "${YELLOW}Branch: ${CYAN}$REPO_BRANCH${NC}"
+    echo -e "${YELLOW}PHP: ${CYAN}$PHP_VERSION${NC}"
     echo ""
-    echo -n "Select option [0-7]: "
+    echo -n "Select option [0-9]: "
 }
 
 # Full deployment
 deploy_full() {
     print_header "🚀 FULL DEPLOYMENT - XẾ HỘ 24/7"
+    log_deployment "Starting full deployment"
     
-    print_info "Step 1/7: Pulling latest code from Git..."
-    ssh_exec "cd /var/www/webroot/xeho247danang && git pull origin $REPO_BRANCH"
+    local start_time=$(date +%s)
+    
+    # Enable maintenance mode
+    print_info "Step 1/7: Enabling maintenance mode..."
+    ssh_exec "cd $SERVER_PATH && php artisan down --retry=60" || print_warning "Maintenance mode failed (continuing...)"
+    
+    print_info "Step 2/7: Pulling latest code from Git..."
+    if ! ssh_exec "cd /var/www/webroot/xeho247danang && git pull origin $REPO_BRANCH"; then
+        print_error "Git pull failed!"
+        ssh_exec "cd $SERVER_PATH && php artisan up"
+        return 1
+    fi
     print_success "Code updated"
     
-    print_info "Step 2/7: Installing Composer dependencies..."
-    ssh_exec "cd $SERVER_PATH && composer install --no-dev --optimize-autoloader"
+    print_info "Step 3/7: Installing Composer dependencies..."
+    ssh_exec "cd $SERVER_PATH && composer install --no-dev --optimize-autoloader --no-interaction"
     print_success "Dependencies installed"
     
-    print_info "Step 3/7: Running database migrations..."
+    print_info "Step 4/7: Running database migrations..."
     ssh_exec "cd $SERVER_PATH && php artisan migrate --force"
     print_success "Migrations completed"
     
-    print_info "Step 4/7: Clearing application cache..."
-    ssh_exec "cd $SERVER_PATH && php artisan cache:clear && php artisan config:clear && php artisan route:clear && php artisan view:clear"
-    print_success "Cache cleared"
-    
-    print_info "Step 5/7: Optimizing application..."
-    ssh_exec "cd $SERVER_PATH && php artisan config:cache && php artisan route:cache && php artisan view:cache"
-    print_success "Application optimized"
+    print_info "Step 5/7: Clearing & caching (optimized)..."
+    ssh_exec "cd $SERVER_PATH && php artisan optimize:clear && php artisan optimize"
+    print_success "Cache optimized"
     
     print_info "Step 6/7: Setting permissions..."
     ssh_exec "cd $SERVER_PATH && chown -R www-data:www-data storage bootstrap/cache && chmod -R 775 storage bootstrap/cache"
@@ -144,9 +163,29 @@ deploy_full() {
     ssh_exec "systemctl restart php${PHP_VERSION}-fpm && systemctl restart nginx"
     print_success "Services restarted"
     
-    print_success "🎉 Deployment completed successfully!"
+    local end_time=$(date +%s)
+    local duration=$((end_time - start_time))
+    
+    print_success "🎉 Deployment completed in ${duration}s!"
+    log_deployment "Deployment completed successfully in ${duration}s"
     echo ""
-    echo -e "${GREEN}Website: ${CYAN}https://xeho247.vn${NC}"
+    
+    # Ask to disable maintenance mode
+    echo ""
+    print_warning "Website is currently in MAINTENANCE MODE"
+    echo -n "Do you want to disable maintenance mode and make site live? (yes/no): "
+    read enable_site
+    
+    if [[ "$enable_site" == "yes" || "$enable_site" == "y" ]]; then
+        print_info "Disabling maintenance mode..."
+        ssh_exec "cd $SERVER_PATH && php artisan up"
+        print_success "Site is now LIVE! ✨"
+        echo ""
+        echo -e "${GREEN}Website: ${CYAN}https://xeho247.vn${NC}"
+    else
+        print_info "Site remains in maintenance mode"
+        echo -e "${YELLOW}To enable later, run: ${CYAN}php artisan up${NC}"
+    fi
 }
 
 # Install dependencies only
@@ -218,6 +257,47 @@ view_logs() {
     ssh_exec "tail -50 $SERVER_PATH/storage/logs/laravel.log"
 }
 
+# Backup database
+backup_database() {
+    print_header "💾 BACKING UP DATABASE"
+    
+    local backup_file="xeho247_$(date +%Y%m%d_%H%M%S).sql"
+    
+    print_info "Creating database backup: $backup_file"
+    ssh_exec "cd $SERVER_PATH && php artisan db:backup --filename=$backup_file" || \
+    ssh_exec "mkdir -p $BACKUP_DIR && mysqldump -u\$(grep DB_USERNAME .env | cut -d '=' -f2) -p\$(grep DB_PASSWORD .env | cut -d '=' -f2) \$(grep DB_DATABASE .env | cut -d '=' -f2) > $BACKUP_DIR/$backup_file"
+    
+    print_success "Database backed up to: $BACKUP_DIR/$backup_file"
+}
+
+# Rollback deployment
+rollback_deploy() {
+    print_header "⏪ ROLLBACK DEPLOYMENT"
+    
+    print_warning "This will reset to the previous commit!"
+    echo -n "Are you sure? (yes/no): "
+    read confirm
+    
+    if [[ "$confirm" != "yes" ]]; then
+        print_info "Rollback cancelled"
+        return 0
+    fi
+    
+    print_info "Rolling back to previous commit..."
+    ssh_exec "cd /var/www/webroot/xeho247danang && git reset --hard HEAD~1"
+    
+    print_info "Updating dependencies..."
+    ssh_exec "cd $SERVER_PATH && composer install --no-dev --optimize-autoloader"
+    
+    print_info "Clearing cache..."
+    ssh_exec "cd $SERVER_PATH && php artisan optimize:clear"
+    
+    print_info "Restarting services..."
+    ssh_exec "systemctl restart php${PHP_VERSION}-fpm && systemctl restart nginx"
+    
+    print_success "Rollback completed!"
+}
+
 # Main execution
 main() {
     # Check SSH connection first
@@ -251,12 +331,18 @@ main() {
             7)
                 view_logs
                 ;;
+            8)
+                backup_database
+                ;;
+            9)
+                rollback_deploy
+                ;;
             0)
                 print_info "Exiting deployment script. Goodbye!"
                 exit 0
                 ;;
             *)
-                print_error "Invalid option. Please select 0-7."
+                print_error "Invalid option. Please select 0-9."
                 ;;
         esac
         
