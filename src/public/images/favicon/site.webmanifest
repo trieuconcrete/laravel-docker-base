@@ -1,0 +1,24 @@
+{
+  "name": "Xế Hộ 24/7 - Đà Nẵng",
+  "short_name": "Xế Hộ 247",
+  "description": "Dịch vụ thuê tài xế lái xe hộ uy tín tại Đà Nẵng",
+  "icons": [
+    {
+      "src": "/images/favicon/web-app-manifest-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/images/favicon/web-app-manifest-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "theme_color": "#C9A227",
+  "background_color": "#000000",
+  "display": "standalone",
+  "start_url": "/",
+  "scope": "/"
+}

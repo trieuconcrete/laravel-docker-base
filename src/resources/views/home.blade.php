@@ -45,7 +45,13 @@
     <meta name="apple-mobile-web-app-title" content="Xế Hộ 24/7">
     
     <!-- Favicons -->
-    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+    <link rel="icon" type="image/x-icon" href="{{ asset('images/favicon/favicon.ico') }}">
+    <link rel="icon" type="image/svg+xml" href="{{ asset('images/favicon/favicon.svg') }}">
+    <link rel="icon" type="image/png" sizes="96x96" href="{{ asset('images/favicon/favicon-96x96.png') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('images/favicon/apple-touch-icon.png') }}">
+    <link rel="manifest" href="{{ asset('images/favicon/site.webmanifest') }}">
+    <meta name="msapplication-TileColor" content="#C9A227">
+    <meta name="theme-color" content="#C9A227">
     
     <!-- DNS Prefetch & Preconnect -->
     <link rel="dns-prefetch" href="//maps.googleapis.com">
