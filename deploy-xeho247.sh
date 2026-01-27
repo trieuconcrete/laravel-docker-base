@@ -26,7 +26,7 @@ SSH_PASSWORD="36z0zCaWXsk2wGdS"
 SERVER_PATH="/var/www/webroot/xeho247danang/src"
 REPO_URL="git@github.com:trieuconcrete/laravel-docker-base.git"  # Update with actual repo URL
 REPO_BRANCH="project/xeho247danang"
-PHP_VERSION="8.2"
+PHP_VERSION="8.4"
 
 # SSH command wrapper with auto password
 SSH_CMD="sshpass -p ${SSH_PASSWORD} ssh -o StrictHostKeyChecking=no -o PreferredAuthentications=password -o PubkeyAuthentication=no"
