@@ -23,7 +23,7 @@ NC='\033[0m' # No Color
 # Configuration
 SSH_HOST="cloudfly-hpl"
 # pass: 36z0zCaWXsk2wGdS
-SERVER_PATH="/var/www/webroot/xeho247danang"
+SERVER_PATH="/var/www/webroot/xeho247danang/src"
 REPO_URL="git@github.com:trieuconcrete/laravel-docker-base.git"  # Update with actual repo URL
 REPO_BRANCH="project/xeho247danang"
 PHP_VERSION="8.2"
@@ -94,7 +94,7 @@ deploy_full() {
     print_header "🚀 FULL DEPLOYMENT - XẾ HỘ 24/7"
     
     print_info "Step 1/7: Pulling latest code from Git..."
-    ssh ${SSH_HOST} "cd $SERVER_PATH && git pull origin $REPO_BRANCH"
+    ssh ${SSH_HOST} "cd /var/www/webroot/xeho247danang && git pull origin $REPO_BRANCH"
     print_success "Code updated"
     
     print_info "Step 2/7: Installing Composer dependencies..."
