@@ -28,8 +28,10 @@ REPO_URL="git@github.com:trieuconcrete/laravel-docker-base.git"  # Update with a
 REPO_BRANCH="project/xeho247danang"
 PHP_VERSION="8.4"
 
-# SSH command wrapper with auto password
-SSH_CMD="sshpass -p ${SSH_PASSWORD} ssh -o StrictHostKeyChecking=no -o PreferredAuthentications=password -o PubkeyAuthentication=no"
+# SSH function wrapper with auto password
+ssh_exec() {
+    sshpass -p "${SSH_PASSWORD}" ssh -o StrictHostKeyChecking=no -o PreferredAuthentications=password -o PubkeyAuthentication=no "${SSH_HOST}" "$@"
+}
 
 # Functions
 
@@ -74,7 +76,7 @@ check_ssh() {
         fi
     fi
     
-    if ${SSH_CMD} ${SSH_HOST} "echo 'SSH OK'" 2>/dev/null; then
+    if ssh_exec "echo 'SSH OK'" 2>/dev/null; then
         print_success "SSH connection OK"
         return 0
     else
@@ -115,31 +117,31 @@ deploy_full() {
     print_header "🚀 FULL DEPLOYMENT - XẾ HỘ 24/7"
     
     print_info "Step 1/7: Pulling latest code from Git..."
-    ${SSH_CMD} ${SSH_HOST} "cd /var/www/webroot/xeho247danang && git pull origin $REPO_BRANCH"
+    ssh_exec "cd /var/www/webroot/xeho247danang && git pull origin $REPO_BRANCH"
     print_success "Code updated"
     
     print_info "Step 2/7: Installing Composer dependencies..."
-    ${SSH_CMD} ${SSH_HOST} "cd $SERVER_PATH && composer install --no-dev --optimize-autoloader"
+    ssh_exec "cd $SERVER_PATH && composer install --no-dev --optimize-autoloader"
     print_success "Dependencies installed"
     
     print_info "Step 3/7: Running database migrations..."
-    ${SSH_CMD} ${SSH_HOST} "cd $SERVER_PATH && php artisan migrate --force"
+    ssh_exec "cd $SERVER_PATH && php artisan migrate --force"
     print_success "Migrations completed"
     
     print_info "Step 4/7: Clearing application cache..."
-    ${SSH_CMD} ${SSH_HOST} "cd $SERVER_PATH && php artisan cache:clear && php artisan config:clear && php artisan route:clear && php artisan view:clear"
+    ssh_exec "cd $SERVER_PATH && php artisan cache:clear && php artisan config:clear && php artisan route:clear && php artisan view:clear"
     print_success "Cache cleared"
     
     print_info "Step 5/7: Optimizing application..."
-    ${SSH_CMD} ${SSH_HOST} "cd $SERVER_PATH && php artisan config:cache && php artisan route:cache && php artisan view:cache"
+    ssh_exec "cd $SERVER_PATH && php artisan config:cache && php artisan route:cache && php artisan view:cache"
     print_success "Application optimized"
     
     print_info "Step 6/7: Setting permissions..."
-    ${SSH_CMD} ${SSH_HOST} "cd $SERVER_PATH && chown -R www-data:www-data storage bootstrap/cache && chmod -R 775 storage bootstrap/cache"
+    ssh_exec "cd $SERVER_PATH && chown -R www-data:www-data storage bootstrap/cache && chmod -R 775 storage bootstrap/cache"
     print_success "Permissions set"
     
     print_info "Step 7/7: Restarting services..."
-    ${SSH_CMD} ${SSH_HOST} "systemctl restart php${PHP_VERSION}-fpm && systemctl restart nginx"
+    ssh_exec "systemctl restart php${PHP_VERSION}-fpm && systemctl restart nginx"
     print_success "Services restarted"
     
     print_success "🎉 Deployment completed successfully!"
@@ -152,7 +154,7 @@ install_dependencies() {
     print_header "📦 INSTALLING DEPENDENCIES"
     
     print_info "Installing Composer packages..."
-    ${SSH_CMD} ${SSH_HOST} "cd $SERVER_PATH && composer install --no-dev --optimize-autoloader"
+    ssh_exec "cd $SERVER_PATH && composer install --no-dev --optimize-autoloader"
     print_success "Dependencies installed"
 }
 
@@ -161,7 +163,7 @@ run_migrations() {
     print_header "🗄️  RUNNING DATABASE MIGRATIONS"
     
     print_info "Running migrations..."
-    ${SSH_CMD} ${SSH_HOST} "cd $SERVER_PATH && php artisan migrate --force"
+    ssh_exec "cd $SERVER_PATH && php artisan migrate --force"
     print_success "Migrations completed"
 }
 
@@ -170,7 +172,7 @@ clear_cache() {
     print_header "🧹 CLEARING CACHE"
     
     print_info "Clearing all caches..."
-    ${SSH_CMD} ${SSH_HOST} "cd $SERVER_PATH && php artisan cache:clear && php artisan config:clear && php artisan route:clear && php artisan view:clear"
+    ssh_exec "cd $SERVER_PATH && php artisan cache:clear && php artisan config:clear && php artisan route:clear && php artisan view:clear"
     print_success "All caches cleared"
 }
 
@@ -179,11 +181,11 @@ restart_services() {
     print_header "🔄 RESTARTING SERVICES"
     
     print_info "Restarting PHP-FPM..."
-    ${SSH_CMD} ${SSH_HOST} "systemctl restart php${PHP_VERSION}-fpm"
+    ssh_exec "systemctl restart php${PHP_VERSION}-fpm"
     print_success "PHP-FPM restarted"
     
     print_info "Restarting Nginx..."
-    ${SSH_CMD} ${SSH_HOST} "systemctl restart nginx"
+    ssh_exec "systemctl restart nginx"
     print_success "Nginx restarted"
 }
 
@@ -192,19 +194,19 @@ check_status() {
     print_header "📊 SERVER STATUS CHECK"
     
     echo -e "${CYAN}=== PHP-FPM Status ===${NC}"
-    ${SSH_CMD} ${SSH_HOST} "systemctl status php${PHP_VERSION}-fpm --no-pager | head -10"
+    ssh_exec "systemctl status php${PHP_VERSION}-fpm --no-pager | head -10"
     echo ""
     
     echo -e "${CYAN}=== Nginx Status ===${NC}"
-    ${SSH_CMD} ${SSH_HOST} "systemctl status nginx --no-pager | head -10"
+    ssh_exec "systemctl status nginx --no-pager | head -10"
     echo ""
     
     echo -e "${CYAN}=== Disk Usage ===${NC}"
-    ${SSH_CMD} ${SSH_HOST} "df -h | grep -E '(Filesystem|/dev/)'"
+    ssh_exec "df -h | grep -E '(Filesystem|/dev/)'"
     echo ""
     
     echo -e "${CYAN}=== Memory Usage ===${NC}"
-    ${SSH_CMD} ${SSH_HOST} "free -h"
+    ssh_exec "free -h"
     echo ""
 }
 
@@ -213,7 +215,7 @@ view_logs() {
     print_header "📝 VIEWING LARAVEL LOGS"
     
     print_info "Last 50 lines of Laravel log..."
-    ${SSH_CMD} ${SSH_HOST} "tail -50 $SERVER_PATH/storage/logs/laravel.log"
+    ssh_exec "tail -50 $SERVER_PATH/storage/logs/laravel.log"
 }
 
 # Main execution
@@ -258,9 +260,28 @@ main() {
                 ;;
         esac
         
-        echo ""
-        echo -e "${YELLOW}Press Enter to continue...${NC}"
-        read
+        if [ $? -eq 0 ]; then
+            echo ""
+            echo -e "${GREEN}✨ Operation completed successfully!${NC}"
+            echo ""
+            echo -e "${YELLOW}Options:${NC}"
+            echo -e "  ${CYAN}[Enter]${NC} - Return to menu"
+            echo -e "  ${CYAN}[q]${NC} - Quit"
+            echo ""
+            echo -n "Your choice: "
+            read continue_choice
+            
+            if [[ "$continue_choice" == "q" || "$continue_choice" == "Q" ]]; then
+                print_info "Exiting deployment script. Goodbye!"
+                exit 0
+            fi
+        else
+            echo ""
+            echo -e "${RED}⚠️  Operation completed with errors${NC}"
+            echo ""
+            echo -e "${YELLOW}Press Enter to return to menu...${NC}"
+            read
+        fi
     done
 }
 
