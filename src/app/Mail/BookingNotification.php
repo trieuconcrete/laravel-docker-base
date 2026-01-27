@@ -27,9 +27,18 @@ class BookingNotification extends Mailable
      */
     public function envelope(): Envelope
     {
-        return new Envelope(
+        $envelope = new Envelope(
             subject: '🚗 Đơn Đặt Xe Mới - ' . $this->booking->name,
         );
+
+        // Add CC emails if configured
+        $ccEmails = config('mail.booking_cc_emails');
+        if ($ccEmails) {
+            $ccList = array_map('trim', explode(',', $ccEmails));
+            $envelope->cc($ccList);
+        }
+
+        return $envelope;
     }
 
     /**

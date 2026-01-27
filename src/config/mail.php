@@ -126,4 +126,15 @@ return [
 
     'admin_email' => env('ADMIN_EMAIL', 'admin@xeho247danang.vn'),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Booking CC Emails
+    |--------------------------------------------------------------------------
+    |
+    | Comma-separated list of email addresses to CC on booking notifications
+    |
+    */
+
+    'booking_cc_emails' => env('BOOKING_CC_EMAILS', ''),
+
 ];
