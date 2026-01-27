@@ -1,11 +1,64 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
+    <!-- Basic Meta Tags -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Xế Hộ 24/7 - Đà Nẵng | Thuê Tài Xế Lái Xe Hộ</title>
+    
+    <!-- SEO Meta Tags -->
+    <title>Thuê Tài Xế Lái Xe Hộ Đà Nẵng 24/7 | Xế Hộ 247 - An Toàn, Uy Tín</title>
+    <meta name="description" content="Dịch vụ thuê tài xế lái xe hộ uy tín tại Đà Nẵng ⭐ Chuyên nghiệp 24/7 ⭐ Phục vụ trong 10 phút ⭐ Giá từ 150k ⭐ Hotline: 0559 304 993">
+    <meta name="keywords" content="thuê tài xế, lái xe hộ, tài xế hộ đà nẵng, thuê tài xế đà nẵng, dịch vụ lái xe hộ, xe hộ 24/7, tài xế an toàn">
+    <meta name="author" content="Xế Hộ 24/7 - Đà Nẵng">
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+    <link rel="canonical" href="https://xeho247.vn">
+    
+    <!-- Geo Tags -->
+    <meta name="geo.region" content="VN-DN">
+    <meta name="geo.placename" content="Đà Nẵng">
+    <meta name="geo.position" content="16.0544;108.2022">
+    <meta name="ICBM" content="16.0544, 108.2022">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://xeho247.vn">
+    <meta property="og:title" content="Thuê Tài Xế Lái Xe Hộ Đà Nẵng 24/7 - An Toàn, Uy Tín">
+    <meta property="og:description" content="Dịch vụ thuê tài xế lái xe hộ chuyên nghiệp tại Đà Nẵng. Phục vụ 24/7, tài xế đến trong 10 phút. Giá từ 150k. Hotline: 0559 304 993">
+    <meta property="og:image" content="{{ asset('images/logo.jpeg') }}">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:site_name" content="Xế Hộ 24/7 - Đà Nẵng">
+    <meta property="og:locale" content="vi_VN">
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Thuê Tài Xế Lái Xe Hộ Đà Nẵng 24/7 - An Toàn, Uy Tín">
+    <meta name="twitter:description" content="Dịch vụ thuê tài xế lái xe hộ chuyên nghiệp tại Đà Nẵng. Phục vụ 24/7, tài xế đến trong 10 phút. Giá từ 150k">
+    <meta name="twitter:image" content="{{ asset('images/logo.jpeg') }}">
+    
+    <!-- Mobile & PWA -->
+    <meta name="theme-color" content="#C9A227">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Xế Hộ 24/7">
+    
+    <!-- Favicons -->
+    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+    
+    <!-- DNS Prefetch & Preconnect -->
+    <link rel="dns-prefetch" href="//maps.googleapis.com">
+    <link rel="dns-prefetch" href="//fonts.googleapis.com">
+    <link rel="dns-prefetch" href="//fonts.gstatic.com">
+    <link rel="dns-prefetch" href="//cdn.jsdelivr.net">
+    <link rel="preconnect" href="https://maps.googleapis.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <!-- Google Maps API with Places Library -->
@@ -1490,6 +1543,102 @@
             color: var(--gold-hover) !important;
         }
     </style>
+    
+    <!-- Structured Data (JSON-LD) -->
+    @verbatim
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "LocalBusiness",
+                "@id": "https://xeho247.vn/#organization",
+                "name": "Xế Hộ 24/7 - Đà Nẵng",
+                "alternateName": "Xế Hộ 247 Đà Nẵng",
+                "url": "https://xeho247.vn",
+                "logo": {
+                    "@type": "ImageObject",
+                    "url": "/images/logo.jpeg",
+                    "width": 250,
+                    "height": 250
+                },
+                "image": "/images/logo.jpeg",
+                "description": "Dịch vụ thuê tài xế lái xe hộ chuyên nghiệp tại Đà Nẵng. Phục vụ 24/7, tài xế đến trong 10 phút. An toàn, uy tín, giá cả hợp lý.",
+                "telephone": "+84559304993",
+                "email": "admin@xeho247danang.vn",
+                "address": {
+                    "@type": "PostalAddress",
+                    "addressLocality": "Đà Nẵng",
+                    "addressRegion": "Đà Nẵng",
+                    "addressCountry": "VN"
+                },
+                "geo": {
+                    "@type": "GeoCoordinates",
+                    "latitude": "16.0544",
+                    "longitude": "108.2022"
+                },
+                "areaServed": {
+                    "@type": "City",
+                    "name": "Đà Nẵng"
+                },
+                "priceRange": "150000-200000 VND",
+                "openingHoursSpecification": {
+                    "@type": "OpeningHoursSpecification",
+                    "dayOfWeek": [
+                        "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"
+                    ],
+                    "opens": "00:00",
+                    "closes": "23:59"
+                },
+                "sameAs": [
+                    "https://www.facebook.com/xeho247danang",
+                    "https://www.tiktok.com/@xeho247danang",
+                    "https://www.youtube.com/@xeho247danang"
+                ]
+            },
+            {
+                "@type": "WebSite",
+                "@id": "https://xeho247.vn/#website",
+                "url": "https://xeho247.vn",
+                "name": "Xế Hộ 24/7 - Đà Nẵng",
+                "description": "Dịch vụ thuê tài xế lái xe hộ Đà Nẵng",
+                "publisher": {
+                    "@id": "https://xeho247.vn/#organization"
+                },
+                "inLanguage": "vi-VN"
+            },
+            {
+                "@type": "Service",
+                "serviceType": "Thuê tài xế lái xe hộ",
+                "provider": {
+                    "@id": "https://xeho247.vn/#organization"
+                },
+                "areaServed": {
+                    "@type": "City",
+                    "name": "Đà Nẵng"
+                },
+                "offers": {
+                    "@type": "Offer",
+                    "priceSpecification": [
+                        {
+                            "@type": "PriceSpecification",
+                            "price": "150000",
+                            "priceCurrency": "VND",
+                            "name": "Giá ban ngày (6h-23h59)"
+                        },
+                        {
+                            "@type": "PriceSpecification",
+                            "price": "200000",
+                            "priceCurrency": "VND",
+                            "name": "Giá ban đêm (0h-5h59)"
+                        }
+                    ]
+                }
+            }
+        ]
+    }
+    </script>
+    @endverbatim
 </head>
 <body>
     <!-- Navigation -->
@@ -2358,7 +2507,7 @@
 
         // SweetAlert2 for booking form
         @if(session('success'))
-            const successMessage = '{{ session('success') }}';
+            const successMessage = {!! json_encode(session('success')) !!};
             const isBookingSuccess = successMessage.includes('đặt xe') || successMessage.includes('booking');
             
             Swal.fire({
@@ -2388,10 +2537,15 @@
         @endif
 
         @if($errors->any())
+            const errorMessages = @json($errors->all());
+            const errorHtml = '<ul style="text-align: left; padding-left: 20px;">' + 
+                errorMessages.map(error => `<li>${error}</li>`).join('') + 
+                '</ul>';
+            
             Swal.fire({
                 icon: 'error',
                 title: 'Có lỗi xảy ra!',
-                html: '<ul style="text-align: left; padding-left: 20px;">@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul>',
+                html: errorHtml,
                 confirmButtonText: 'Đóng',
                 confirmButtonColor: '#E63946',
                 background: '#1A1A1A',

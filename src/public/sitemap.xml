@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+    <url>
+        <loc>https://xeho247.vn</loc>
+        <lastmod>2026-01-27</lastmod>
+        <changefreq>daily</changefreq>
+        <priority>1.0</priority>
+        <image:image>
+            <image:loc>https://xeho247.vn/images/logo.jpeg</image:loc>
+            <image:title>Xế Hộ 24/7 - Đà Nẵng Logo</image:title>
+            <image:caption>Dịch vụ thuê tài xế lái xe hộ chuyên nghiệp tại Đà Nẵng</image:caption>
+        </image:image>
+    </url>
+</urlset>
