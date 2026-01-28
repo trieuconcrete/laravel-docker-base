@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="google-site-verification" content="cXUAor4Tcwrw41sWUaOpq0x65hHZlYadQ7n7Ti4rlcU">
     
     <!-- SEO Meta Tags -->
     <title>Thuê Tài Xế Lái Xe Hộ Đà Nẵng 24/7 | Xế Hộ 247 - An Toàn, Uy Tín</title>
