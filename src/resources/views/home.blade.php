@@ -83,6 +83,15 @@
             console.error('Check: 1) API key is correct, 2) APIs are enabled, 3) Billing is active');
         };
     </script>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-3ZKQFZ4PPB"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-3ZKQFZ4PPB');
+    </script>
     <script src="https://maps.googleapis.com/maps/api/js?key={{ config('services.map.google.api_key') }}&libraries=places&language=vi&region=VN&callback=initMap" async defer></script>
     <style>
         :root {
