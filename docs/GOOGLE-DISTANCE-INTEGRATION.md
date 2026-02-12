@@ -151,7 +151,241 @@ Nếu có vấn đề, kiểm tra:
 3. Domain đã được thêm vào whitelist (nếu có restrictions)
 4. Console log trong trình duyệt để xem lỗi chi tiết
 
+## 💰 Chi Phí Google Maps API
+
+### Giá Miễn Phí Hàng Tháng
+Google cung cấp **$200 credit miễn phí** mỗi tháng cho tất cả APIs.
+
+### Bảng Giá Chi Tiết
+
+Dự án sử dụng 3 APIs sau:
+
+#### 1. Maps JavaScript API
+- **Giá**: $7 cho 1,000 lượt load map
+- **Miễn phí**: 28,500 lượt load/tháng
+- **Công dụng**: Hiển thị bản đồ trên trang booking
+
+#### 2. Places API (Autocomplete)
+- **Giá**: $2.83 cho 1,000 requests  
+- **Miễn phí**: ~70,700 requests/tháng
+- **Công dụng**: Gợi ý địa chỉ tự động khi khách hàng nhập điểm đón/đến
+
+#### 3. Distance Matrix API ⚠️
+- **Giá**: $5 cho 1,000 requests
+- **Miễn phí**: 40,000 requests/tháng
+- **Công dụng**: Tính khoảng cách và thời gian di chuyển
+
+### Ước Tính Chi Phí Thực Tế
+
+#### Scenario 1: Website mới/nhỏ (100 bookings/ngày)
+```
+📊 Tính toán:
+- Map loads:        100 × 30 = 3,000/tháng   → $21
+- Autocomplete:     400 × 30 = 12,000/tháng  → $34
+- Distance Matrix:  100 × 30 = 3,000/tháng   → $15
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+TỔNG CHI PHÍ:                                  ~$70/tháng
+                                               
+✅ HOÀN TOÀN MIỄN PHÍ (dưới $200 credit)
+```
+
+#### Scenario 2: Website phát triển (500 bookings/ngày)
+```
+📊 Tính toán:
+- Map loads:        500 × 30 = 15,000/tháng   → $105
+- Autocomplete:   2,000 × 30 = 60,000/tháng   → $170
+- Distance Matrix:  500 × 30 = 15,000/tháng   → $75
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+TỔNG CHI PHÍ:                                  ~$350/tháng
+
+⚠️ VƯỢT CREDIT: Phải trả $150/tháng (350 - 200)
+```
+
+#### Scenario 3: Website lớn (1,500 bookings/ngày)
+```
+📊 Tính toán:
+- Map loads:      1,500 × 30 = 45,000/tháng   → $315
+- Autocomplete:   6,000 × 30 = 180,000/tháng  → $509
+- Distance Matrix: 1,500 × 30 = 45,000/tháng  → $225
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+TỔNG CHI PHÍ:                                  ~$1,049/tháng
+
+❌ VƯỢT CREDIT: Phải trả $849/tháng (1,049 - 200)
+```
+
+### 💡 Cách Giảm Chi Phí
+
+#### 1. Cache Kết Quả Distance Matrix
+Lưu kết quả tính khoảng cách vào database để tránh tính lại:
+
+```php
+// Pseudo code
+$cacheKey = "distance_{$pickup}_{$dropoff}";
+$cached = Cache::get($cacheKey);
+
+if (!$cached) {
+    $distance = callGoogleDistanceAPI($pickup, $dropoff);
+    Cache::put($cacheKey, $distance, 7 * 24 * 60); // Cache 7 ngày
+}
+```
+
+**Tiết kiệm**: 50-70% chi phí Distance Matrix API
+
+#### 2. Tối Ưu Autocomplete
+- Chỉ gọi API sau khi gõ >= 3 ký tự
+- Debounce 1-2 giây (đã implement)
+- Giới hạn số lượng kết quả trả về
+
+**Tiết kiệm**: 30-40% chi phí Autocomplete
+
+#### 3. Lazy Load Map
+Chỉ load map khi người dùng scroll đến section booking:
+
+```javascript
+// Sử dụng Intersection Observer
+const observer = new IntersectionObserver((entries) => {
+    if (entries[0].isIntersecting) {
+        loadGoogleMapsScript();
+    }
+});
+```
+
+**Tiết kiệm**: 20-30% chi phí Maps JavaScript API
+
+#### 4. Sử dụng Static Maps cho Preview
+Thay vì load interactive map, dùng Static Maps API (rẻ hơn 10 lần):
+
+```html
+<img src="https://maps.googleapis.com/maps/api/staticmap?..." />
+```
+
+**Tiết kiệm**: Giảm 90% chi phí nếu không cần interaction
+
+### 📊 Monitoring & Alerts
+
+#### Xem Usage Hiện Tại
+```
+🔗 Google Cloud Console - APIs Dashboard
+https://console.cloud.google.com/apis/dashboard
+
+Theo dõi:
+- Số lượng requests từng API
+- Chi phí tích lũy theo ngày
+- Trend tăng/giảm
+```
+
+#### Set Budget Alerts
+```
+🔗 Google Cloud Console - Billing
+https://console.cloud.google.com/billing
+
+Cài đặt cảnh báo:
+1. Vào "Budgets & alerts"
+2. Click "Create budget"
+3. Set ngưỡng: $50, $100, $150
+4. Nhận email khi gần đạt ngưỡng
+```
+
+#### Xem Billing Reports
+```
+🔗 Billing Reports
+https://console.cloud.google.com/billing/reports
+
+Xem chi tiết:
+- Chi phí từng API theo tháng
+- So sánh tháng trước/tháng này
+- Dự đoán chi phí cuối tháng
+- Export CSV để báo cáo
+```
+
+### 📋 Report Cho Khách Hàng
+
+#### Mẫu Report Tháng
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📊 BÁO CÁO CHI PHÍ GOOGLE MAPS API
+Tháng: [MM/YYYY]
+Dự án: Xế Hộ 24/7 - Đà Nẵng
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📈 THỐNG KÊ SỬ DỤNG:
+├─ Tổng số bookings:        [XXX] lượt
+├─ Map loads:                [XXX] requests
+├─ Autocomplete:             [XXX] requests
+└─ Distance calculation:     [XXX] requests
+
+💰 CHI PHÍ:
+├─ Maps JavaScript API:      $XX.XX
+├─ Places API:               $XX.XX
+├─ Distance Matrix API:      $XX.XX
+├─ Tổng chi phí:             $XXX.XX
+├─ Google Credit (miễn phí): -$200.00
+└─ Số tiền phải trả:         $XX.XX
+
+📊 SO SÁNH:
+├─ Tháng trước:              $XX.XX
+└─ Tăng/giảm:                [+/-]XX%
+
+💡 KHUYẾN NGHỊ:
+[Gợi ý tối ưu dựa trên usage thực tế]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+#### Script Tự Động Export Report
+
+```php
+<?php
+// File: app/Console/Commands/ExportGoogleMapsReport.php
+
+namespace App\Console\Commands;
+
+use Illuminate\Console\Command;
+
+class ExportGoogleMapsReport extends Command
+{
+    protected $signature = 'report:google-maps {month?}';
+    
+    public function handle()
+    {
+        $month = $this->argument('month') ?? now()->format('Y-m');
+        
+        // 1. Lấy số liệu từ Google Cloud Console API
+        // 2. Lấy số bookings từ database
+        // 3. Tính toán chi phí
+        // 4. Export ra file PDF/Excel
+        
+        $this->info("✅ Report đã được tạo: storage/reports/google-maps-{$month}.pdf");
+    }
+}
+```
+
+### 🎯 Khuyến Nghị Cho Khách Hàng
+
+| Số Bookings/Ngày | Chi Phí/Tháng | Khuyến Nghị |
+|------------------|---------------|-------------|
+| < 300            | $0 (miễn phí) | ✅ Dùng Google Maps - tối ưu nhất |
+| 300 - 1,000      | $100 - $300   | ⚠️ Implement caching để giảm chi phí |
+| 1,000 - 2,000    | $300 - $700   | ⚠️ Cân nhắc hybrid (Google + OSM) |
+| > 2,000          | > $700        | ❌ Chuyển sang OpenStreetMap hoàn toàn |
+
+### ⚠️ Lưu Ý Quan Trọng
+
+1. **Yêu cầu billing account**: Phải liên kết thẻ tín dụng/ghi nợ (Visa/Mastercard)
+2. **Verification charge**: Google có thể charge $1 để verify thẻ, sau đó refund lại
+3. **Auto-charge**: Nếu vượt $200, Google sẽ tự động charge vào thẻ
+4. **Set spending limit**: Có thể giới hạn chi tiêu tối đa để tránh surprise bill
+
+### 🔗 Links Hữu Ích
+
+- **Pricing Calculator**: https://mapsplatform.google.com/pricing/
+- **Usage Dashboard**: https://console.cloud.google.com/google/maps-apis/metrics
+- **Billing Console**: https://console.cloud.google.com/billing
+- **API Documentation**: https://developers.google.com/maps/documentation
+
 ## Tác Giả
 - Ngày tích hợp: 24/01/2026
 - Framework: Laravel + Google Maps API
 - Dịch vụ: Xế Hộ 24/7 - Đà Nẵng
+- Cập nhật chi phí: 12/02/2026

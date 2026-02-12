@@ -2004,6 +2004,20 @@
                     <h3>BẢNG GIÁ THUÊ TÀI XẾ LÁI XE HỘ</h3>
                 </div>
                 
+                <!-- Thông báo Tết (chỉ hiển thị từ 17-22 tháng 2 năm 2026) -->
+                @php
+                    $currentYear = (int) date('Y');
+                    $currentMonth = (int) date('n');
+                    $currentDay = (int) date('j');
+                    $isTetPeriod = ($currentYear === 2026 && $currentMonth === 2 && $currentDay >= 12 && $currentDay <= 22);
+                @endphp
+                
+                @if($isTetPeriod)
+                <div style="padding: 15px; background: rgba(230, 57, 70, 0.15); text-align: center; border-bottom: 1px solid var(--red);">
+                    <strong class="text-red" style="color: #FF4D5A; font-size: 16px;">🧧 Thông báo: Giá tăng 20% vào các ngày 17, 18, 19, 20, 21, 22 tháng 2 (Tết Nguyên Đán)</strong>
+                </div>
+                @endif
+                
                 <!-- Giá ban ngày -->
                 <div style="padding: 15px; background: rgba(201, 162, 39, 0.1); text-align: center;">
                     <strong class="text-gold">Bảng Giá Áp Dụng Từ 6h - 23h59</strong>
@@ -2331,9 +2345,17 @@
         
         // Calculate price based on distance
         function calculatePrice(distanceKm) {
-            const currentHour = new Date().getHours();
+            const now = new Date();
+            const currentHour = now.getHours();
+            const currentYear = now.getFullYear();
+            const currentMonth = now.getMonth() + 1; // getMonth() returns 0-11
+            const currentDate = now.getDate();
             let price = 0;
             let priceNote = '';
+            
+            // Check if it's Tet holiday period (Feb 17-22, 2026 only)
+            const isTetHoliday = (currentYear === 2026 && currentMonth === 2 && currentDate >= 17 && currentDate <= 22);
+            const tetSurcharge = isTetHoliday ? 1.2 : 1; // 20% increase during Tet
             
             // Determine if it's day (6h-23h59) or night (0h-5h59)
             const isNightTime = currentHour >= 0 && currentHour < 6;
@@ -2342,19 +2364,23 @@
             
             if (distanceKm > 30) {
                 // Over 30km - need to contact hotline
+                const tetNote = isTetHoliday ? ' ⚠️ Giá tăng 20% trong dịp Tết (17-22/2)' : '';
                 return {
                     price: null,
-                    message: '📞 Liên hệ hotline 0559 304 993 để thỏa thuận giá cả',
-                    note: 'Khoảng cách trên 30km, vui lòng liên hệ để được báo giá chính xác'
+                    message: '📞 Liên hệ hotline 0559 304 993 để thỏa thuận giá cả' + tetNote,
+                    note: 'Khoảng cách trên 30km, vui lòng liên hệ để được báo giá chính xác' + tetNote
                 };
             } else if (distanceKm <= 5) {
                 // 0-5km: Base price only
-                price = basePrice;
-                priceNote = `Giá mở cửa (0-5km) ${isNightTime ? 'ban đêm' : 'ban ngày'}`;
+                price = basePrice * tetSurcharge;
+                const tetNote = isTetHoliday ? ' (🧧 +20% phụ thu Tết)' : '';
+                priceNote = `Giá mở cửa (0-5km) ${isNightTime ? 'ban đêm' : 'ban ngày'}${tetNote}`;
             } else {
                 // 5-30km: Base price + per km charge
-                price = basePrice + (distanceKm - 5) * perKmPrice;
-                priceNote = `${basePrice.toLocaleString('vi-VN')}đ (giá mở cửa) + ${((distanceKm - 5) * perKmPrice).toLocaleString('vi-VN')}đ (${(distanceKm - 5).toFixed(1)}km × 15.000đ)`;
+                const regularPrice = basePrice + (distanceKm - 5) * perKmPrice;
+                price = regularPrice * tetSurcharge;
+                const tetNote = isTetHoliday ? ' (🧧 +20% phụ thu Tết)' : '';
+                priceNote = `${basePrice.toLocaleString('vi-VN')}đ (giá mở cửa) + ${((distanceKm - 5) * perKmPrice).toLocaleString('vi-VN')}đ (${(distanceKm - 5).toFixed(1)}km × 15.000đ)${tetNote}`;
             }
             
             return {
