@@ -1,0 +1,49 @@
+# ===== DEPENDENCIES =====
+src/node_modules/
+src/vendor/
+src/dist/
+src/build/
+
+# ===== LARAVEL COMPILED & AUTO-GENERATED FILES =====
+src/bootstrap/cache/
+src/storage/
+
+# ===== PUBLIC ASSETS =====
+src/public/hot
+src/public/storage
+src/public/build/
+src/public/css/
+src/public/js/
+src/public/fonts/
+src/public/images/
+
+# ===== LOGS & LOCK FILES =====
+*.log
+*.lock
+npm-debug.log*
+yarn-error.log*
+
+# ===== ENVIRONMENT & SECRETS =====
+# src/.env
+# src/.env.local
+# src/.env.development.local
+# src/.env.test.local
+# src/.env.production.local
+# src/.env.backup
+
+# ===== GIT INTERNALS =====
+.git/objects/
+.git/refs/
+.git/logs/
+.git/COMMIT_EDITMSG
+
+# ===== BACKUPS =====
+backups/
+
+# ===== DOCKER GENERATED =====
+docker-compose.override.yml
+deploy.log
+
+# ===== OS FILES =====
+.DS_Store
+Thumbs.db

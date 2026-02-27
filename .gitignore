@@ -28,3 +28,4 @@ backups/
 
 # Docker override
 docker-compose.override.yml
+deploy.log

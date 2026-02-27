@@ -31,7 +31,7 @@
     <!-- Brand Header Bar -->
     <div class="fixed top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 z-50"></div>
     
-    <div x-data="{ showPassword: false }" class="min-h-screen flex items-center justify-center p-4 sm:p-6">
+    <div x-data="{ showPassword: false }" class="min-h-screen flex items-center justify-center p-6">
         
         <div class="w-full max-w-md">
             
@@ -49,7 +49,7 @@
                 <!-- Accent Bar -->
                 <div class="h-1 bg-blue-600"></div>
                 
-                <div class="p-6 sm:p-8">
+                <div class="p-8">
                     
                     <!-- Welcome Message -->
                     <div class="mb-6 text-center">
@@ -87,7 +87,7 @@
                             @enderror
                         </div>
 
-                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                        <div class="flex items-center justify-between">
                             <label class="flex items-center cursor-pointer">
                                 <input type="checkbox" name="remember" class="w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-blue-600">
                                 <span class="ml-2 text-sm text-slate-600">Remember me</span>

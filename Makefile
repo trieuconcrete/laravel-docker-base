@@ -71,6 +71,56 @@ perm: ## Fix permissions
 	docker-compose exec app chmod -R 775 /var/www/html/storage
 	docker-compose exec app chmod -R 775 /var/www/html/bootstrap/cache
 
+# User Management Commands
+user-create: ## Tạo user mới (interactive)
+	docker-compose exec app php artisan user:create --interactive
+
+user-password: ## Reset password user (ví dụ: make user-password email="user@example.com")
+	docker-compose exec app php artisan user:password $(email)
+
+user-list: ## Liệt kê tất cả users
+	docker-compose exec app php artisan user:list
+
+user-delete: ## Xóa user (ví dụ: make user-delete email="user@example.com")
+	docker-compose exec app php artisan user:delete $(email)
+
+# Project Management Commands
+project-reset: ## Reset toàn bộ project (fresh + seed + cache clear)
+	docker-compose exec app php artisan project:reset
+
+project-health: ## Kiểm tra health của services
+	docker-compose exec app php artisan project:health --detailed
+
+project-setup: ## Setup project wizard (interactive: tạo DB mới + admin user)
+	@echo "🚀 Starting interactive project setup..."
+	@echo "This will help you create a new database and admin user"
+	@echo ""
+	docker-compose exec app php artisan project:setup
+
+project-setup-new: ## Setup project hoàn toàn mới (fresh database + admin user)
+	@echo "🔄 Setting up completely new project..."
+	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+	@echo "⚠️  WARNING: This will DROP all existing tables!"
+	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+	@read -p "Continue? [y/N]: " confirm && [ "$$confirm" = "y" ] || exit 1
+	@echo ""
+	@echo "Step 1: Dropping all tables..."
+	docker-compose exec app php artisan db:wipe --force
+	@echo "Step 2: Running setup wizard..."
+	docker-compose exec app php artisan project:setup --create-database
+	@echo ""
+	@echo "✅ New project setup completed!"
+
+# Database Management Commands
+db-status: ## Xem status database
+	docker-compose exec app php artisan db:status --detailed
+
+db-backup: ## Backup database
+	docker-compose exec app php artisan db:backup --compress
+
+db-restore: ## Restore database từ backup
+	docker-compose exec app php artisan db:restore --latest
+
 install-laravel: ## Cài đặt Laravel 12 mới
 	docker-compose up -d
 	@echo "Đang cài đặt Laravel 12..."
@@ -98,7 +148,10 @@ configure-env: ## Cấu hình .env với Docker services
 	@docker-compose exec app sed -i 's/MAIL_HOST=.*/MAIL_HOST=mailhog/g' .env 2>/dev/null || true
 	@docker-compose exec app sed -i 's/MAIL_PORT=.*/MAIL_PORT=1025/g' .env 2>/dev/null || true
 
-setup: ## Setup project lần đầu (Laravel đã có sẵn trong src/)
+setup: ## Setup project lần đầu (Laravel đã có sẵn trong src/) - DEPRECATED, dùng project-setup
+	@echo "⚠️  This command is deprecated. Use 'make project-setup' instead."
+	@echo ""
+	@read -p "Continue with old setup? [y/N]: " confirm && [ "$$confirm" = "y" ] || (echo "Use: make project-setup" && exit 1)
 	@if [ ! -f "src/artisan" ]; then \
 		echo "❌ Không tìm thấy Laravel trong thư mục src/"; \
 		echo "Chạy 'make install-laravel' để cài đặt Laravel mới"; \
@@ -119,3 +172,6 @@ setup: ## Setup project lần đầu (Laravel đã có sẵn trong src/)
 	@echo "✅ Setup hoàn tất!"
 	@echo "🌐 Application: http://localhost:8000"
 	@echo "📧 Mailhog UI: http://localhost:8025"
+
+setup-fresh: ## Alias cho project-setup-new
+	@make project-setup-new
