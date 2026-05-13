@@ -35,6 +35,12 @@ laravel-docker-base/
 - **DEPLOYMENT.md** - Hướng dẫn deploy production
 - **PORT-CONFLICTS.md** - 🔧 Xử lý xung đột ports (MySQL 3306→3307)
 
+### 💰 Google API & Tích hợp
+- **GOOGLE-API-PRICING-REPORT.md** - 📊 Báo cáo chi phí Google Maps API
+- **FIX-GOOGLE-API-ERROR.md** - 🔧 Hướng dẫn fix lỗi API Not Activated
+- **GOOGLE-DISTANCE-INTEGRATION.md** - 📍 Tích hợp tính khoảng cách
+- **OPENSTREETMAP-INTEGRATION.md** - 🗺️ Phương án thay thế miễn phí
+
 ### 📄 File này
 - **INDEX.md** - Tổng hợp tài liệu (file này)
 

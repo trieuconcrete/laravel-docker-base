@@ -10,7 +10,7 @@
     
     <!-- SEO Meta Tags -->
     <title>Thuê Tài Xế Lái Xe Hộ Đà Nẵng 24/7 | Xế Hộ 247 - An Toàn, Uy Tín</title>
-    <meta name="description" content="Dịch vụ thuê tài xế lái xe hộ uy tín tại Đà Nẵng ⭐ Chuyên nghiệp 24/7 ⭐ Phục vụ trong 10 phút ⭐ Giá từ 150k ⭐ Hotline: 0559 304 993">
+    <meta name="description" content="Dịch vụ thuê tài xế lái xe hộ uy tín tại Đà Nẵng ⭐ Chuyên nghiệp 24/7 ⭐ Phục vụ trong 10 phút ⭐ Giá từ 150k ⭐ Hotline: 0703 424 343">
     <meta name="keywords" content="thuê tài xế, lái xe hộ, tài xế hộ đà nẵng, thuê tài xế đà nẵng, dịch vụ lái xe hộ, xe hộ 24/7, tài xế an toàn">
     <meta name="author" content="Xế Hộ 24/7 - Đà Nẵng">
     <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
@@ -26,7 +26,7 @@
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://xeho247.vn">
     <meta property="og:title" content="Thuê Tài Xế Lái Xe Hộ Đà Nẵng 24/7 - An Toàn, Uy Tín">
-    <meta property="og:description" content="Dịch vụ thuê tài xế lái xe hộ chuyên nghiệp tại Đà Nẵng. Phục vụ 24/7, tài xế đến trong 10 phút. Giá từ 150k. Hotline: 0559 304 993">
+    <meta property="og:description" content="Dịch vụ thuê tài xế lái xe hộ chuyên nghiệp tại Đà Nẵng. Phục vụ 24/7, tài xế đến trong 10 phút. Giá từ 150k. Hotline: 0703 424 343">
     <meta property="og:image" content="{{ asset('images/logo.jpeg') }}">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
@@ -1693,11 +1693,11 @@
                 <a href="#pricing">Bảng giá</a>
                 <a href="#contact">Liên hệ</a>
             </div>
-            <a href="tel:0559304993" class="nav-phone">
+            <a href="tel:0703424343" class="nav-phone">
                 <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>
                 </svg>
-                0559 304 993
+                0703 424 343
             </a>
         </div>
     </nav>
@@ -1791,8 +1791,8 @@
 
                         <div style="text-align: center; margin: 20px 0; color: var(--white-40);">hoặc</div>
 
-                        <a href="tel:0559304993" class="btn-outline-gold" style="width: 100%; justify-content: center;">
-                            📞 Gọi 0559 304 993
+                        <a href="tel:0703424343" class="btn-outline-gold" style="width: 100%; justify-content: center;">
+                            📞 Gọi 0703 424 343
                         </a>
                     </form>
                 </div>
@@ -1828,7 +1828,7 @@
 
                     <div class="hotline-box">
                         <p>Cần hỗ trợ ngay?</p>
-                        <a href="tel:0559304993">0559 304 993</a>
+                        <a href="tel:0703424343">0703 424 343</a>
                         <span>Hotline 24/7 - Miễn phí cuộc gọi</span>
                     </div>
                 </div>
@@ -1847,7 +1847,7 @@
             </div>
             <h1 class="hero-title">XẾ HỘ 24/7 - ĐÀ NẴNG</h1>
             <div class="hero-phone">
-                <a href="tel:0559304993">0559 304 993</a>
+                <a href="tel:0703424343">0703 424 343</a>
             </div>
             <p class="hero-price">GIÁ CHỈ TỪ 150.000Đ</p>
             
@@ -1861,11 +1861,11 @@
             </div>
             
             <div class="hero-cta">
-                <a href="tel:0559304993" class="btn-gold">
+                <a href="tel:0703424343" class="btn-gold">
                     <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>
                     </svg>
-                    Gọi ngay: 0559 304 993
+                    Gọi ngay: 0703 424 343
                 </a>
                 <a href="#booking" class="btn-outline-gold">
                     Đặt xe online
@@ -2138,7 +2138,7 @@
                         <div class="contact-icon">📞</div>
                         <div>
                             <span>Hotline 24/7</span>
-                            <a href="tel:0559304993">0559 304 993</a>
+                            <a href="tel:0703424343">0703 424 343</a>
                         </div>
                     </div>
 
@@ -2238,7 +2238,7 @@
             </div>
 
             <div class="footer-bottom">
-                <p>© 2026 Xế Hộ 24/7 - Đà Nẵng. Hotline: 0559 304 993</p>
+                <p>© 2026 Xế Hộ 24/7 - Đà Nẵng. Hotline: 0703 424 343</p>
                 <div class="footer-links">
                     <a href="#">Chính sách bảo mật</a>
                     <a href="#">Điều khoản</a>
@@ -2249,7 +2249,7 @@
 
     <!-- Floating Buttons -->
     <div class="floating-btns">
-        <a href="tel:0559304993" class="float-btn float-btn-phone pulse">
+        <a href="tel:0703424343" class="float-btn float-btn-phone pulse">
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
             </svg>
@@ -2367,7 +2367,7 @@
                 const tetNote = isTetHoliday ? ' ⚠️ Giá tăng 20% trong dịp Tết (17-22/2)' : '';
                 return {
                     price: null,
-                    message: '📞 Liên hệ hotline 0559 304 993 để thỏa thuận giá cả' + tetNote,
+                    message: '📞 Liên hệ hotline 0703 424 343 để thỏa thuận giá cả' + tetNote,
                     note: 'Khoảng cách trên 30km, vui lòng liên hệ để được báo giá chính xác' + tetNote
                 };
             } else if (distanceKm <= 5) {
